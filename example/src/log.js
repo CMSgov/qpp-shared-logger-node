@@ -1,6 +1,6 @@
 "use strict";
 
-const sharedLogger = require('@cmsgov/qpp-shared-logger-node');
+const sharedLogger = require('qpp-shared-logger-node');
 
 sharedLogger.configure({
     projectSlug: 'ExampleApp'

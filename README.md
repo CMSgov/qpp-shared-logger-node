@@ -5,7 +5,7 @@ This logger is opinionated. Configure it with a minimal set of options, and get 
 
 ## Installation
 ```
-$ yarn add @cms/qpp-shared-logger-node
+$ yarn add qpp-shared-logger-node
 ```
 
 ## Usage
@@ -18,7 +18,7 @@ get access to the Logger object.
 
 log.js:
 ```javascript
-const sharedLogger = require('@cmsgov/qpp-shared-logger-node');
+const sharedLogger = require('qpp-shared-logger-node');
 
 sharedLogger.configure({
     projectSlug: 'my-app-name'

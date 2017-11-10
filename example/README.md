@@ -1,7 +1,7 @@
 # An example implementation
 To update the code,
 ```
-$ yarn upgrade @cmsgov/qpp-shared-logger-node
+$ yarn upgrade qpp-shared-logger-node
 ```
 
 ## Basic logger - winston

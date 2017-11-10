@@ -6,6 +6,6 @@
   "author": "Jonathan Julian <jonathan@adhocteam.us>",
   "license": "MIT",
   "dependencies": {
-    "@cmsgov/qpp-shared-logger-node": "file:.."
+    "qpp-shared-logger-node": "file:.."
   }
 }

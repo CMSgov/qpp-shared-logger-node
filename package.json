@@ -1,5 +1,5 @@
 {
-    "name": "@cmsgov/qpp-shared-logger-node",
+    "name": "qpp-shared-logger-node",
     "version": "1.0.0",
     "description": "Common QPP logger that is shared across the different teams",
     "main": "src/index.js",
