@@ -1,0 +1,11 @@
+{
+  "name": "qpp-shared-logger-node-example",
+  "version": "1.0.0",
+  "description": "Example client using the shared logger",
+  "main": "src/index.js",
+  "author": "Jonathan Julian <jonathan@adhocteam.us>",
+  "license": "MIT",
+  "dependencies": {
+    "@cmsgov/qpp-shared-logger-node": "file:.."
+  }
+}
