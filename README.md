@@ -104,6 +104,14 @@ $ yarn format   # run prettier to format code
 $ yarn lint     # run eslint to check code
 ```
 
+## Contributing to this project
+If you are planning on contributing to this project, please open a pull request with the branch title either name of the JIRA ticket that describes the work or some name that unambiguous.  We have a few people that we can assign the pull request to that should cover most of the stakeholders that would be interested in this project's development.
+
+Name | Email | EUA Id | Company
+--- | --- | --- | ---
+Scott Haselton | scott.haselton@cms.hhs.gov | H98G |  USDS 
+Jonathan Julian | jonathan@adhocteam.us | JS1I | Ad Hoc
+
 ## Resources
 * https://jira.cms.gov/browse/QPPELIG-130
 * https://jira.cms.gov/browse/QPPELIG-131
