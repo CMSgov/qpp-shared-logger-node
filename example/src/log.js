@@ -1,10 +1,9 @@
-'use strict';
+"use strict";
 
 const sharedLogger = require('qpp-shared-logger-node');
 
 sharedLogger.configure({
-    projectSlug: 'ExampleApp',
-    redactKeys: sharedLogger.defaultRedactKeys.concat(['pepper'])
+    projectSlug: 'ExampleApp'
 });
 
 module.exports = sharedLogger.logger;
