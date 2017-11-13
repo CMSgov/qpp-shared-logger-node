@@ -135,18 +135,12 @@ function accessLogEnabled(options) {
 }
 
 const defaultRedactKeys = [
-    'authorization',
     'email',
     'firstname',
     'lastname',
-    'login',
     'password',
-    'practice_tin',
     'ptan',
-    'qpp-provider-transaction-access-number',
-    'qpp-taxpayer-identification-number',
     'tin',
-    'tin_num',
     'userid',
     'username'
 ];
