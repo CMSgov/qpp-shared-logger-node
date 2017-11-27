@@ -191,6 +191,23 @@ let sharedLogger = {
         } else {
             this.accessLogger = undefined;
         }
+    },
+
+    /**
+     * Return a logger that includes the given fields with all entries.
+     * @param  {Object} fields metadata to include with logs
+     */
+    contextLogger: function(fields) {
+        let logger = {};
+        logger.log = (level, msg, meta) =>
+            this.logger.log(level, msg, Object.assign({}, fields, meta));
+        logger.error = (msg, meta) => logger.log('error', msg, meta);
+        logger.warn = (msg, meta) => logger.log('warn', msg, meta);
+        logger.info = (msg, meta) => logger.log('info', msg, meta);
+        logger.verbose = (msg, meta) => logger.log('verbose', msg, meta);
+        logger.debug = (msg, meta) => logger.log('debug', msg, meta);
+        logger.silly = (msg, meta) => logger.log('silly', msg, meta);
+        return logger;
     }
 };
 

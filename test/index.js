@@ -287,6 +287,36 @@ describe('sharedLogger', function() {
                     done();
                 }, 5); // give stdout a moment
             });
+            it('should log context fields', function(done) {
+                let captured = '';
+                // begin capturing stdout, this returns the stop fn
+                var stopCapturingStdout = startCapturingStdout(
+                    text => (captured += text)
+                );
+                const logger2 = sharedLogger.contextLogger({ x: 1, y: 5 });
+                const logger3 = sharedLogger.contextLogger({ x: 2, z: 8 });
+                sharedLogger.logger.warn('MESSAGE 1', {});
+                logger2.warn('MESSAGE 2', { a: 1000 });
+                logger3.error('MESSAGE 3');
+                logger2.info('MESSAGE 4'); // info not logged
+                sharedLogger.logger.error('MESSAGE 5', { z: 9 });
+                // Override x in the context
+                logger3.warn('MESSAGE 6', { x: 3 });
+                stopCapturingStdout();
+                setTimeout(() => {
+                    assert.match(captured, /MESSAGE/);
+                    assert.equal(
+                        captured,
+                        `warn: MESSAGE 1
+warn: MESSAGE 2 x=1, y=5, a=1000
+error: MESSAGE 3 x=2, z=8
+error: MESSAGE 5 z=9
+warn: MESSAGE 6 x=3, z=8
+`
+                    );
+                    done();
+                }, 5); // give stdout a moment
+            });
         });
 
         describe('when disabled', function() {

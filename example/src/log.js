@@ -6,5 +6,8 @@ sharedLogger.configure({
     projectSlug: 'ExampleApp'
 });
 
-module.exports = sharedLogger.logger;
-module.exports.accessLogger = sharedLogger.accessLogger;
+module.exports = {
+    logger: sharedLogger.logger,
+    accessLogger: sharedLogger.accessLogger,
+    contextLogger: sharedLogger.contextLogger,
+};

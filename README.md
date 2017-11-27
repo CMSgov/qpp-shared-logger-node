@@ -34,6 +34,21 @@ const logger = require('log');
 logger.info('fetching data', { id: object.id, sort: 'asc' });
 ```
 
+### Logging with context fields
+The `contextLogger` function returns a logger object that includes a set of
+fields with each log message. The fields are merged with those passed to a
+logging method.
+
+For example, this can be used to log a request id in all entries related to a
+single client request:
+
+```javascript
+req.logger = sharedLogger.contextLogger({ requestId: uuidv1(), url: req.url });
+req.logger.info('started');
+req.logger.error(message, { error: err });
+```
+
+Field values in the log call take priority over values in the context fields.
 
 ## Configuration
 
