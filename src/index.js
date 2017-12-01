@@ -12,7 +12,6 @@ function defaultLogDirByEnvironment(options) {
     switch (options.environment) {
         case 'production':
             return `/var/log/${options.projectSlug}`;
-            break;
         case 'test':
         case 'development':
         default:
