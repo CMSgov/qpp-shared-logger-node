@@ -50,6 +50,25 @@ req.logger.error(message, { error: err });
 
 Field values in the log call take priority over values in the context fields.
 
+### Context Logging Defaults
+There are defaults that should be added to the context of the beginning with each request if possible.
+
+Attribute Name | Attribute Value | Description
+--- | --- | ---
+requestId | UUID | This is a unique ID that will allow for tracking events throughout the livetime of the request.  This can be populated either through [uuid](https://www.npmjs.com/package/uuid) or [express request id](https://www.npmjs.com/package/express-request-id) or some other preferred UUID generator method.
+oktaId | string | This value should be pulled from the auth service if possible
+applicationBuild or gitSHA | string | This should be the build id or the git SHA of the current running application
+
+```javascript
+const requestContext = {
+  requestId: uuidv1(),
+  oktaId: AuthService(), // The auth service should return the okta id.
+  applicationBuild: process.env.BUILD_ID // what constant the application would be storing this information
+}
+
+req.logger = sharedLogger.contextLogger(requestContext);
+```
+
 ## Configuration
 
 Key | Description | Allowed Values
