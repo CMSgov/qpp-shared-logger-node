@@ -49,7 +49,9 @@ function accessLogToConsole(options) {
 
 function buildLogTransport(options) {
     if (logToConsole(options)) {
-        return new winston.transports.Console();
+        return new winston.transports.Console({
+            colorize: Boolean(options.logColorize)
+        });
     } else {
         if (options.rotationMaxsize !== 'none') {
             return new winston.transports.DailyRotateFile({
@@ -58,14 +60,16 @@ function buildLogTransport(options) {
                 )}`,
                 label: options.projectSlug,
                 datePattern: '.yyyyMMdd.log',
-                maxsize: options.rotationMaxsize || defaultRotationMaxsize
+                maxsize: options.rotationMaxsize || defaultRotationMaxsize,
+                colorize: Boolean(options.logColorize)
             });
         } else {
             return new winston.transports.File({
                 filename: `${logDirectory(options)}/${filenames.logFilename(
                     options
                 )}.log`,
-                label: options.projectSlug
+                label: options.projectSlug,
+                colorize: Boolean(options.logColorize)
             });
         }
     }
@@ -175,7 +179,6 @@ let sharedLogger = {
         if (logEnabled(options)) {
             this.logger = new winston.Logger({
                 level: logLevel(options),
-                colorize: Boolean(options.logColorize),
                 transports: [buildLogTransport(options)]
             });
             this.logger.rewriters.push(
