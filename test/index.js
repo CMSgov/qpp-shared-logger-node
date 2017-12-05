@@ -3,7 +3,6 @@
 const assert = require('chai').assert;
 const sinon = require('sinon');
 const fs = require('fs');
-const startCapturingStdout = require('intercept-stdout');
 const moment = require('moment');
 const sharedLogger = require('../src');
 
@@ -148,8 +147,11 @@ describe('sharedLogger', function() {
 
     context('#logger', function() {
         describe('when configured', function() {
-            var spy;
+            let spy;
+            let sandbox;
             before(function() {
+                sandbox = sinon.sandbox.create();
+
                 sharedLogger.configure({
                     environment: 'development',
                     projectSlug: 'tester',
@@ -164,7 +166,7 @@ describe('sharedLogger', function() {
                 });
             });
             beforeEach(function() {
-                spy = sinon.spy();
+                spy = sandbox.spy();
                 sharedLogger.logger.add(SpyTransport, {
                     spy: spy,
                     level: 'debug'
@@ -172,6 +174,7 @@ describe('sharedLogger', function() {
             });
             afterEach(function() {
                 sharedLogger.logger.remove('SpyTransport');
+                sandbox.restore();
             });
             after(function() {
                 rmFile('/tmp/ktke.log');
@@ -181,14 +184,9 @@ describe('sharedLogger', function() {
             it('should have log level -debug-', function() {
                 sharedLogger.logger.debug('DEBUG', {});
                 sharedLogger.logger.silly('SILLY', {});
-                assert(
-                    spy.calledWith('debug', 'DEBUG', {}),
-                    'logger did not log a debug message'
-                );
-                assert(
-                    spy.neverCalledWith('silly', 'SILLY', {}),
-                    'logger should not have logged a silly message'
-                );
+
+                sandbox.assert.calledWith(spy, 'debug', 'DEBUG', {});
+                sandbox.assert.neverCalledWith(spy, 'silly', 'SILLY', {});
             });
             it('should log to a file', function(done) {
                 truncateFile('/tmp/ktke.log');
@@ -242,7 +240,8 @@ describe('sharedLogger', function() {
         });
 
         describe('when configured', function() {
-            var spy;
+            let spy;
+            let sandbox;
             before(function() {
                 sharedLogger.configure({
                     environment: 'development',
@@ -250,51 +249,43 @@ describe('sharedLogger', function() {
                     logDirectory: 'console',
                     logLevel: 'warn'
                 });
+                sandbox = sinon.sandbox.create();
             });
             beforeEach(function() {
-                spy = sinon.spy();
+                spy = sandbox.spy();
                 sharedLogger.logger.add(SpyTransport, {
                     spy: spy,
                     level: 'warn'
                 });
+                sandbox.spy(process.stdout, 'write');
+                sandbox.spy(process.stderr, 'write');
             });
             afterEach(function() {
                 sharedLogger.logger.remove('SpyTransport');
+                sandbox.restore();
             });
 
             it('should have log level -warn-', function() {
                 sharedLogger.logger.warn('WARN', {});
                 sharedLogger.logger.info('INFO', {});
-                assert(
-                    spy.calledWith('warn', 'WARN', {}),
-                    'logger did not log a warn message'
-                );
-                assert(
-                    spy.neverCalledWith('info', 'INFO', {}),
-                    'logger should not have logged an info message'
-                );
+
+                sandbox.assert.calledWith(spy, 'warn', 'WARN', {});
+                sandbox.assert.neverCalledWith(spy, 'info', 'INFO', {});
             });
-            it('should log to stdout', function(done) {
-                let captured = '';
-                // begin capturing stdout, this returns the stop fn
-                var stopCapturingStdout = startCapturingStdout(
-                    text => (captured += text)
-                );
+
+            it('should log to stdout', function() {
                 sharedLogger.logger.warn('MESSAGE', {});
-                stopCapturingStdout();
-                setTimeout(() => {
-                    assert.match(captured, /MESSAGE/);
-                    done();
-                }, 5); // give stdout a moment
-            });
-            it('should log context fields', function(done) {
-                let captured = '';
-                // begin capturing stdout, this returns the stop fn
-                var stopCapturingStdout = startCapturingStdout(
-                    text => (captured += text)
+
+                sandbox.assert.calledWith(
+                    process.stdout.write,
+                    'warn: MESSAGE\n'
                 );
+            });
+
+            it('should log context fields', function() {
                 const logger2 = sharedLogger.contextLogger({ x: 1, y: 5 });
                 const logger3 = sharedLogger.contextLogger({ x: 2, z: 8 });
+
                 sharedLogger.logger.warn('MESSAGE 1', {});
                 logger2.warn('MESSAGE 2', { a: 1000 });
                 logger3.error('MESSAGE 3');
@@ -302,23 +293,43 @@ describe('sharedLogger', function() {
                 sharedLogger.logger.error('MESSAGE 5', { z: 9 });
                 // Override x in the context
                 logger3.warn('MESSAGE 6', { x: 3 });
-                stopCapturingStdout();
-                setTimeout(() => {
-                    assert.match(captured, /MESSAGE/);
-                    assert.equal(
-                        captured,
-                        `warn: MESSAGE 1
-warn: MESSAGE 2 x=1, y=5, a=1000
-error: MESSAGE 3 x=2, z=8
-error: MESSAGE 5 z=9
-warn: MESSAGE 6 x=3, z=8
-`
-                    );
-                    done();
-                }, 5); // give stdout a moment
+
+                sandbox.assert.callCount(process.stdout.write, 3);
+                sandbox.assert.calledWith(
+                    process.stdout.write,
+                    'warn: MESSAGE 1\n'
+                );
+                sandbox.assert.calledWith(
+                    process.stdout.write,
+                    'warn: MESSAGE 2 x=1, y=5, a=1000\n'
+                );
+                sandbox.assert.calledWith(
+                    process.stdout.write,
+                    'warn: MESSAGE 6 x=3, z=8\n'
+                );
+
+                sandbox.assert.callCount(process.stderr.write, 2);
+                sandbox.assert.calledWith(
+                    process.stderr.write,
+                    'error: MESSAGE 3 x=2, z=8\n'
+                );
+                sandbox.assert.calledWith(
+                    process.stderr.write,
+                    'error: MESSAGE 5 z=9\n'
+                );
+            });
+
+            it('should redact configured PII', function() {
+                // Password is redacted by defaults
+                sharedLogger.logger.warn('MESSAGE', { password: 'ABCDEF' });
+
+                sandbox.assert.called(process.stdout.write);
+                sandbox.assert.calledWith(
+                    process.stdout.write,
+                    'warn: MESSAGE password=[REDACTED]\n'
+                );
             });
         });
-
         describe('when disabled', function() {
             before(function() {
                 sharedLogger.configure({

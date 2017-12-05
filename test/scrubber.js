@@ -64,4 +64,26 @@ describe('scrubber', function() {
         assert.nestedInclude(logMeta, { 'users[1].password': '[REDACTED]' });
         assert.nestedInclude(logMeta, { 'users[1].firstname': '[REDACTED]' });
     });
+    it('should not modify the object passed to it', function() {
+        const input = {
+            zipCode: '96161',
+            users: [
+                {
+                    password: 'Password1',
+                    firstname: 'Jonathan'
+                },
+                {
+                    password: 'Password321',
+                    firstname: 'Jeff'
+                }
+            ]
+        };
+        rewriter('info', 'this is the message', input);
+
+        assert.nestedInclude(input, { 'users[0].password': 'Password1' });
+        assert.nestedInclude(input, { 'users[0].firstname': 'Jonathan' });
+
+        assert.nestedInclude(input, { 'users[1].password': 'Password321' });
+        assert.nestedInclude(input, { 'users[1].firstname': 'Jeff' });
+    });
 });

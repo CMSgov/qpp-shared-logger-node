@@ -1,6 +1,6 @@
 'use strict';
 
-const traverse = require('traverse');
+const _ = require('lodash');
 
 /**
  * Return a winston rewriter that removes all meta
@@ -11,14 +11,14 @@ const traverse = require('traverse');
  */
 function scrubber(redactKeys) {
     return function(level, msg, meta) {
-        traverse(meta).forEach(function() {
-            // see https://www.npmjs.com/package/traverse
-            // "this" is a node in the meta
-            if (this.key && redactKeys.includes(this.key.toLowerCase())) {
-                this.update('[REDACTED]'); // update the value in place
+        // Clone and redact in a single traversal
+        const redacted = _.cloneDeepWith(meta, (value, key) => {
+            if (_.isString(key) && redactKeys.includes(key.toLowerCase())) {
+                return '[REDACTED]';
             }
         });
-        return meta;
+
+        return redacted;
     };
 }
 
