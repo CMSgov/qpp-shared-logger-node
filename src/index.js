@@ -163,7 +163,8 @@ const defaultRedactKeys = [
     'tin',
     'tin_num',
     'userid',
-    'username'
+    'username',
+    'taxpayerIdentificationNumber'
 ];
 
 let sharedLogger = {
