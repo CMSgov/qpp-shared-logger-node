@@ -47,10 +47,20 @@ function accessLogToConsole(options) {
     );
 }
 
+let tzOffset = new Date().getTimezoneOffset() * 60 * 1000; //convert minutes to milliseconds
+
+function localTimestamp() {
+    var localISOTime = new Date(Date.now() - tzOffset)
+        .toISOString()
+        .slice(0, -1); // remove the "Z"
+    return localISOTime;
+}
+
 function buildLogTransport(options) {
     if (logToConsole(options)) {
         return new winston.transports.Console({
-            colorize: Boolean(options.logColorize)
+            colorize: Boolean(options.logColorize),
+            timestamp: localTimestamp
         });
     } else {
         if (options.rotationMaxsize !== 'none') {
@@ -61,7 +71,8 @@ function buildLogTransport(options) {
                 label: options.projectSlug,
                 datePattern: '.yyyyMMdd.log',
                 maxsize: options.rotationMaxsize || defaultRotationMaxsize,
-                colorize: Boolean(options.logColorize)
+                colorize: Boolean(options.logColorize),
+                timestamp: localTimestamp
             });
         } else {
             return new winston.transports.File({
@@ -69,7 +80,8 @@ function buildLogTransport(options) {
                     options
                 )}.log`,
                 label: options.projectSlug,
-                colorize: Boolean(options.logColorize)
+                colorize: Boolean(options.logColorize),
+                timestamp: localTimestamp
             });
         }
     }
@@ -221,3 +233,4 @@ let sharedLogger = {
 
 module.exports = sharedLogger;
 module.exports.defaultRedactKeys = defaultRedactKeys;
+module.exports.localTimestamp = localTimestamp;

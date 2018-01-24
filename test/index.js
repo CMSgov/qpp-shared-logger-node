@@ -237,6 +237,35 @@ describe('sharedLogger', function() {
                     done();
                 }, 5); // give the fs a moment to write the file
             });
+
+            it.only('should emit timestamp in the local server time (not GMT)', function(
+                done
+            ) {
+                // This is the format that Splunk expects: TIME_FORMAT = %Y-%m-%dT%T.%3N
+                // This corresponds to 2017-01-01T03:04:05.123 (note no TZ info, it's local time)
+                let now = moment().format('YYYY-MM-DDTHH:mm:ss.SSS'); // expected
+                sharedLogger.logger.warn('local timestamp is in the meta'); // actual
+                setTimeout(() => {
+                    let data = fs.readFileSync(logFilename, 'utf8');
+                    let logLines = data.split('\n');
+                    assert.isAtMost(logLines.length, 2);
+                    let actualTimestamp = JSON.parse(logLines[0]).timestamp;
+                    let expectedTimestamp = now;
+
+                    // test the timestamp without the ms, which could vary
+                    // depending on the speed of the test
+                    let actualWithoutMs = actualTimestamp.slice(0, -3);
+                    let expectedWithoutMs = expectedTimestamp.slice(0, -3);
+                    assert.equal(actualWithoutMs, expectedWithoutMs);
+
+                    // test the milliseconds are within a small tolerance
+                    let actualMs = Number(actualTimestamp.slice(-3));
+                    let expectedMs = Number(expectedTimestamp.slice(-3));
+                    assert.closeTo(actualMs, expectedMs, 5);
+
+                    done();
+                }, 5); // give the fs a moment to write the file
+            });
         });
 
         describe('when configured', function() {
