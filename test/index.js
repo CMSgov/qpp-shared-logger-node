@@ -5,6 +5,7 @@ const sinon = require('sinon');
 const fs = require('fs');
 const moment = require('moment');
 const sharedLogger = require('../src');
+const TEST_LOG_DIR = process.env.TEST_LOG_DIR || '/tmp';
 
 // A winston Transport that sends log messages to a spy, so
 // logging can be verified
@@ -70,23 +71,26 @@ describe('sharedLogger', function() {
                     environment: 'development',
                     projectSlug: 'tester',
                     accessLog: {
-                        logDirectory: '/tmp',
+                        logDirectory: TEST_LOG_DIR,
                         format: 'combined'
                     }
                 });
             });
             after(function() {
-                rmFile('/tmp/access.log');
+                rmFile(`${TEST_LOG_DIR}/access.log`);
             });
             it('should log http requests to a file', function(done) {
-                truncateFile('/tmp/access.log');
+                truncateFile(`${TEST_LOG_DIR}/access.log`);
 
                 const res = {};
                 const next = () => {};
                 sharedLogger.accessLogger(req, res, next);
 
                 setTimeout(() => {
-                    let data = fs.readFileSync('/tmp/access.log', 'utf8');
+                    let data = fs.readFileSync(
+                        `${TEST_LOG_DIR}/access.log`,
+                        'utf8'
+                    );
                     let logLines = data.split('\n');
                     assert.isAtMost(logLines.length, 2);
                     assert.match(logLines[0], /GET \/index.html/);
@@ -100,26 +104,29 @@ describe('sharedLogger', function() {
                 sharedLogger.configure({
                     environment: 'production',
                     projectSlug: 'tester',
-                    logDirectory: '/tmp',
+                    logDirectory: TEST_LOG_DIR,
                     accessLog: {
-                        logDirectory: '/tmp',
+                        logDirectory: TEST_LOG_DIR,
                         rotationMaxsize: 100 // bytes
                     }
                 });
             });
             after(function() {
-                rmFile('/tmp/access.log');
+                rmFile(`${TEST_LOG_DIR}/access.log`);
             });
 
             it('should log http requests to a file', function(done) {
-                truncateFile('/tmp/access.log');
+                truncateFile(`${TEST_LOG_DIR}/access.log`);
 
                 const res = {};
                 const next = () => {};
                 sharedLogger.accessLogger(req, res, next);
 
                 setTimeout(() => {
-                    let data = fs.readFileSync('/tmp/access.log', 'utf8');
+                    let data = fs.readFileSync(
+                        `${TEST_LOG_DIR}/access.log`,
+                        'utf8'
+                    );
                     let logLines = data.split('\n');
                     assert.isAtMost(logLines.length, 2);
                     assert.match(logLines[0], /GET \/index.html/);
@@ -155,12 +162,12 @@ describe('sharedLogger', function() {
                 sharedLogger.configure({
                     environment: 'development',
                     projectSlug: 'tester',
-                    logDirectory: '/tmp',
+                    logDirectory: TEST_LOG_DIR,
                     logFilenamePrefix: 'ktke',
                     rotationMaxsize: 'none',
                     logLevel: 'debug',
                     accessLog: {
-                        logDirectory: '/tmp',
+                        logDirectory: TEST_LOG_DIR,
                         rotationMaxsize: 'none'
                     }
                 });
@@ -177,8 +184,8 @@ describe('sharedLogger', function() {
                 sandbox.restore();
             });
             after(function() {
-                rmFile('/tmp/ktke.log');
-                rmFile('/tmp/access.log');
+                rmFile(`${TEST_LOG_DIR}/ktke.log`);
+                rmFile(`${TEST_LOG_DIR}/access.log`);
             });
 
             it('should have log level -debug-', function() {
@@ -189,12 +196,15 @@ describe('sharedLogger', function() {
                 sandbox.assert.neverCalledWith(spy, 'silly', 'SILLY', {});
             });
             it('should log to a file', function(done) {
-                truncateFile('/tmp/ktke.log');
+                truncateFile(`${TEST_LOG_DIR}/ktke.log`);
 
                 sharedLogger.logger.debug('logging to file', {});
 
                 setTimeout(() => {
-                    let data = fs.readFileSync('/tmp/ktke.log', 'utf8');
+                    let data = fs.readFileSync(
+                        `${TEST_LOG_DIR}/ktke.log`,
+                        'utf8'
+                    );
                     let logLines = data.split('\n');
                     assert.isAtMost(logLines.length, 2);
                     assert.match(logLines[0], /logging to file/);
@@ -204,24 +214,24 @@ describe('sharedLogger', function() {
         });
 
         describe('when configured with log rotation', function() {
-            const logFilename = `/tmp/ktke.${moment()
+            const logFilename = `${TEST_LOG_DIR}/ktke.${moment()
                 .utc()
                 .format('YYYYMMDD')}.log`;
             before(function() {
                 sharedLogger.configure({
                     environment: 'production',
                     projectSlug: 'tester',
-                    logDirectory: '/tmp',
+                    logDirectory: TEST_LOG_DIR,
                     logFilenamePrefix: 'ktke',
                     rotationMaxsize: 1000, // bytes
                     accessLog: {
-                        logDirectory: '/tmp'
+                        logDirectory: TEST_LOG_DIR
                     }
                 });
             });
             after(function() {
                 rmFile(logFilename);
-                rmFile('/tmp/access.log');
+                rmFile(`${TEST_LOG_DIR}/access.log`);
             });
 
             it('should log to a file', function(done) {
@@ -238,9 +248,10 @@ describe('sharedLogger', function() {
                 }, 5); // give the fs a moment to write the file
             });
 
-            it.only('should emit timestamp in the local server time (not GMT)', function(
+            it('should emit timestamp in the local server time (not GMT)', function(
                 done
             ) {
+                truncateFile(logFilename);
                 // This is the format that Splunk expects: TIME_FORMAT = %Y-%m-%dT%T.%3N
                 // This corresponds to 2017-01-01T03:04:05.123 (note no TZ info, it's local time)
                 let now = moment().format('YYYY-MM-DDTHH:mm:ss.SSS'); // expected
@@ -305,7 +316,7 @@ describe('sharedLogger', function() {
             it('should log to stdout', function() {
                 sharedLogger.logger.warn('MESSAGE', {});
 
-                sandbox.assert.calledWith(
+                sandbox.assert.calledWithMatch(
                     process.stdout.write,
                     'warn: MESSAGE\n'
                 );
@@ -324,25 +335,25 @@ describe('sharedLogger', function() {
                 logger3.warn('MESSAGE 6', { x: 3 });
 
                 sandbox.assert.callCount(process.stdout.write, 3);
-                sandbox.assert.calledWith(
+                sandbox.assert.calledWithMatch(
                     process.stdout.write,
                     'warn: MESSAGE 1\n'
                 );
-                sandbox.assert.calledWith(
+                sandbox.assert.calledWithMatch(
                     process.stdout.write,
                     'warn: MESSAGE 2 x=1, y=5, a=1000\n'
                 );
-                sandbox.assert.calledWith(
+                sandbox.assert.calledWithMatch(
                     process.stdout.write,
                     'warn: MESSAGE 6 x=3, z=8\n'
                 );
 
                 sandbox.assert.callCount(process.stderr.write, 2);
-                sandbox.assert.calledWith(
+                sandbox.assert.calledWithMatch(
                     process.stderr.write,
                     'error: MESSAGE 3 x=2, z=8\n'
                 );
-                sandbox.assert.calledWith(
+                sandbox.assert.calledWithMatch(
                     process.stderr.write,
                     'error: MESSAGE 5 z=9\n'
                 );
@@ -353,7 +364,7 @@ describe('sharedLogger', function() {
                 sharedLogger.logger.warn('MESSAGE', { password: 'ABCDEF' });
 
                 sandbox.assert.called(process.stdout.write);
-                sandbox.assert.calledWith(
+                sandbox.assert.calledWithMatch(
                     process.stdout.write,
                     'warn: MESSAGE password=[REDACTED]\n'
                 );

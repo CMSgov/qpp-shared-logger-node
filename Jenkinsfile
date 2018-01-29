@@ -14,6 +14,9 @@ pipeline {
     }
 
     stage('Test') {
+      environment {
+        TEST_LOG_DIR = 'logs'
+      }
       steps {
         sh 'yarn nsp'
         sh 'yarn lint'
