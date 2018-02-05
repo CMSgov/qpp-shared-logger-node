@@ -20,15 +20,12 @@ function defaultLogDirByEnvironment(options) {
 }
 
 function logDirectory(options) {
-    return (
-        options.logDirectory || defaultLogDirByEnvironment(options)
-    );
+    return options.logDirectory || defaultLogDirByEnvironment(options);
 }
 
 function accessLogDirectory(options) {
     return (
-        options.accessLog.logDirectory ||
-        defaultLogDirByEnvironment(options)
+        options.accessLog.logDirectory || defaultLogDirByEnvironment(options)
     );
 }
 
@@ -178,7 +175,10 @@ let sharedLogger = {
     */
     configure: function(options) {
         if (this.configured) {
-            console.error('sharedLogger.configure(): called more than once, ignoring');
+            // eslint-disable-next-line no-console
+            console.error(
+                'sharedLogger.configure(): called more than once, ignoring'
+            );
             return;
         }
         this.configured = true;

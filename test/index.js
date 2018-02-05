@@ -49,6 +49,9 @@ const req = {
 };
 
 describe('sharedLogger', function() {
+    beforeEach(function() {
+        sharedLogger.configured = false;
+    });
     describe('when configured with missing values', function() {
         it('should throw an error', function() {
             assert.throws(
@@ -56,6 +59,7 @@ describe('sharedLogger', function() {
                 Error,
                 /are required/
             );
+            sharedLogger.configured = false;
             assert.throws(
                 () => sharedLogger.configure({}),
                 Error,
@@ -65,6 +69,9 @@ describe('sharedLogger', function() {
     });
 
     context('#accessLogger', function() {
+        before(function() {
+            sharedLogger.configured = false;
+        });
         describe('when configured', function() {
             before(function() {
                 sharedLogger.configure({
