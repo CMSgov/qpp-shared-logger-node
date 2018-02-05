@@ -170,12 +170,18 @@ const defaultRedactKeys = [
 let sharedLogger = {
     accessLogger: undefined,
     logger: undefined,
+    configured: false,
 
     /**
     * Configure the logger.
     * @param  {Object} options config options
     */
     configure: function(options) {
+        if (this.configured) {
+            console.error('sharedLogger.configure(): called more than once, ignoring');
+            return;
+        }
+        this.configured = true;
         if (!options) {
             throw new Error('options are required');
         }
