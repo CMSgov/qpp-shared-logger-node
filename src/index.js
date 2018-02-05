@@ -11,7 +11,7 @@ const scrubber = require('./scrubber');
 function defaultLogDirByEnvironment(options) {
     switch (options.environment) {
         case 'production':
-            return `/var/log/${options.projectSlug}`;
+            return `/var/log/qpp-service/${options.projectSlug}`;
         case 'test':
         case 'development':
         default:
@@ -21,14 +21,14 @@ function defaultLogDirByEnvironment(options) {
 
 function logDirectory(options) {
     return (
-        options.logDirectory || defaultLogDirByEnvironment(options.environment)
+        options.logDirectory || defaultLogDirByEnvironment(options)
     );
 }
 
 function accessLogDirectory(options) {
     return (
         options.accessLog.logDirectory ||
-        defaultLogDirByEnvironment(options.environment)
+        defaultLogDirByEnvironment(options)
     );
 }
 
