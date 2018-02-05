@@ -4,7 +4,7 @@ const assert = require('chai').assert;
 const scrubber = require('../src/scrubber');
 
 describe('scrubber', function() {
-    const rewriter = scrubber(['password', 'firstname']);
+    const rewriter = scrubber(['password', 'firstname', 'CamelCaseKey']);
 
     it('should allow safe metadata', function() {
         const logMeta = rewriter('info', 'this is the message', {
@@ -23,6 +23,13 @@ describe('scrubber', function() {
         assert.notInclude(logMeta, { firstname: 'Jonathan' });
         assert.include(logMeta, { password: '[REDACTED]' });
         assert.include(logMeta, { firstname: '[REDACTED]' });
+    });
+    it('should redact sensitive metadata case-insensitively', function() {
+        const logMeta = rewriter('info', 'this is the message', {
+            camelcaseKEY: 'secret'
+        });
+        assert.notInclude(logMeta, { camelcaseKEY: 'secret' });
+        assert.include(logMeta, { camelcaseKEY: '[REDACTED]' });
     });
     it('should redact nested sensitive metadata', function() {
         const logMeta = rewriter('info', 'this is the message', {

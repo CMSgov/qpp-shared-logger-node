@@ -10,10 +10,11 @@ const _ = require('lodash');
  * @see https://www.npmjs.com/package/winston#filters-and-rewriters
  */
 function scrubber(redactKeys) {
-    return function(level, msg, meta) {
+    const blacklist = redactKeys.map(key => key.toLowerCase());
+    return function logMetaScrubberWinstonRewriter(level, msg, meta) {
         // Clone and redact in a single traversal
         const redacted = _.cloneDeepWith(meta, (value, key) => {
-            if (_.isString(key) && redactKeys.includes(key.toLowerCase())) {
+            if (_.isString(key) && blacklist.includes(key.toLowerCase())) {
                 return '[REDACTED]';
             }
         });
