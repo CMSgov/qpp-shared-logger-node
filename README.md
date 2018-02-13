@@ -99,9 +99,11 @@ Key | Description | Allowed Values | Default
 environment | Override the "node environment" that your app is running in. Using the conventional values will automatically configure various log settings for you. Conventional values are `development`, `test`, and `production`. Deployed code should [run with `NODE_ENV=production`](https://github.com/i0natan/nodebestpractices/blob/master/sections/production/setnodeenv.md) | `process.env.NODE_ENV`
 logDirectory | A valid directory where the log file should be written, or "console" to write to stdout. Will `throw` if the directory does not exist or is not writable. | `console`, or an absolute dir | _built from environment_
 logFilenamePrefix | The application log filename will be built from this prefix, by default it will be `app.YYYYMMDD.log` | any string | `app`
+logFilenameSuffix | The application log filename will be built with this suffix.  This should contain a date pattern and extension for the log file | any string containing a standard date pattern and extension | `.yyyyMMdd.log`
 logLevel | All log messages at this level or higher will be logged. `none` effectively turns off logging. | `none`, `error`, `warn`, `info`, `verbose`, `debug`, `silly` | _chosen based on environment_
 logColorize | If `true`, log messages will be sent colorized (most valuable when logging to the `console`) | `true` or `false` | `false`
 redactKeys | An array of keys to scrub from the log metadata | an array of lowercase strings | ``['email', 'firstname', 'lastname', 'password', 'ptan', 'tin', 'userid', 'username']``
+maxDays | The maximum number of days to keep logs for. | A number, in days | 0 (No deletion)
 rotationMaxsize | The max size the log file should reach before it is rotated. | a size, in bytes. For example, 1M = 1000000. Or 'none' to never rotate logs | 50000000 (50M)
 
 ### Advanced HTTP Access Log Configuration
@@ -113,6 +115,7 @@ accessLog.logDirectory | A valid directory where the log file should be written,
 accessLog.logFilenamePrefix | The access log filename will be built from this prefix, by default it will be `access.YYYYMMDD.log` | any string | `access`
 accessLog.format | The log format. Note that `combined` and `common` are well-known as NCSA log formats. | `combined`, `common`, `dev`, `short`, `tiny`, `none` | _chosen based on environment_
 accessLog.rotationMaxsize | The max size the log file should reach before it is rotated. | a size, in bytes. For example, 1M = 1000000. Or 'none' to never rotate logs | 50000000 (50M)
+accessLog.maxFiles | The maximum number of rotated logs to keep around. Logs rotated after this will be removed. | a count, in number of files | None (No deletion)
 
 ### Considerations for production logging
 

@@ -66,10 +66,11 @@ function buildLogTransport(options) {
                     options
                 )}`,
                 label: options.projectSlug,
-                datePattern: '.yyyyMMdd.log',
+                datePattern: options.logFilenameSuffix || '.yyyyMMdd.log',
                 maxsize: options.rotationMaxsize || defaultRotationMaxsize,
                 colorize: Boolean(options.logColorize),
-                timestamp: localTimestamp
+                timestamp: localTimestamp,
+                maxDays: options.maxDays || defaultRotationMaxDays
             });
         } else {
             return new winston.transports.File({
@@ -89,13 +90,21 @@ function buildAccessLogStream(options) {
         return undefined; // morgan uses stdout by default
     } else {
         if (options.accessLog.rotationMaxsize !== 'none') {
+            const streamOptions = {
+                path: accessLogDirectory(options),
+                size: `${options.accessLog.rotationMaxsize ||
+                    defaultRotationMaxsize}B`,
+                interval: '1d' // rotate on daily intervals like the other logs
+            }
+
+            // Only add if set
+            if(options.accessLog.maxFiles) {
+                streamOptions.maxFiles = options.accessLog.maxFiles;
+            }
+
             return rotatingFileStream(
                 filenames.accessLogFilenameGenerator(options),
-                {
-                    path: accessLogDirectory(options),
-                    size: `${options.accessLog.rotationMaxsize ||
-                        defaultRotationMaxsize}B`
-                }
+                streamOptions
             );
         } else {
             return fs.createWriteStream(
@@ -109,6 +118,7 @@ function buildAccessLogStream(options) {
 }
 
 const defaultRotationMaxsize = 50000000; // 50M
+const defaultRotationMaxDays = 0; // Keep logs forever by default
 
 const defaultLevelByEnvironment = {
     development: 'debug',
