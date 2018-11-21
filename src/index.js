@@ -174,6 +174,24 @@ const defaultRedactKeys = [
     'taxpayerIdentificationNumber'
 ];
 
+// A winston-equivalent logger used for logLevel='none' that just
+// suppresses all output
+const noneLogger = {
+  log: function() {},
+  error: function() {},
+  warn: function() {},
+  info: function() {},
+  verbose: function() {},
+  debug: function() {},
+  silly: function() {},
+  transports: []
+};
+
+// A morgan-equivalent logger used for format='none' that suppresses
+// all output
+const noneAccessLogger = function(req, res, next) {
+};
+
 let sharedLogger = {
     accessLogger: undefined,
     logger: undefined,
@@ -214,7 +232,7 @@ let sharedLogger = {
                 scrubber(options.redactKeys || defaultRedactKeys)
             );
         } else {
-            this.logger = undefined;
+            this.logger = noneLogger;
         }
 
         //
@@ -226,7 +244,7 @@ let sharedLogger = {
                 stream: buildAccessLogStream(options)
             });
         } else {
-            this.accessLogger = undefined;
+            this.accessLogger = noneAccessLogger;
         }
     },
 

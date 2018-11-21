@@ -149,12 +149,24 @@ describe('sharedLogger', function() {
                     projectSlug: 'tester',
                     loglevel: 'none',
                     accessLog: {
-                        format: 'none'
+                        format: 'none',
+                        directory: 'console'
                     }
                 });
             });
-            it('should not build an accessLogger', function() {
-                assert.isUndefined(sharedLogger.accessLogger);
+
+            it('should silently suppress log messages', function() {
+              const sandbox = sinon.sandbox.create();
+              sandbox.spy(process.stdout, 'write');
+              sandbox.spy(process.stderr, 'write');
+
+              const res = {};
+              const next = () => {};
+
+              sharedLogger.accessLogger(req, res, next);
+              sandbox.assert.notCalled(process.stdout.write);
+              sandbox.assert.notCalled(process.stderr.write);
+              sandbox.restore();
             });
         });
     });
@@ -381,6 +393,7 @@ describe('sharedLogger', function() {
             before(function() {
                 sharedLogger.configure({
                     environment: 'development',
+                    logDirectory: 'console',
                     projectSlug: 'tester',
                     logLevel: 'none',
                     accessLog: {
@@ -388,8 +401,23 @@ describe('sharedLogger', function() {
                     }
                 });
             });
-            it('should not build a logger', function() {
-                assert.isUndefined(sharedLogger.logger);
+
+            it('should silently suppress logger calls', function() {
+              const sandbox = sinon.sandbox.create();
+              sandbox.spy(process.stdout, 'write');
+              sandbox.spy(process.stderr, 'write');
+
+              sharedLogger.logger.log('warn', 'This is a test');
+              sandbox.assert.notCalled(process.stdout.write);
+              sandbox.assert.notCalled(process.stderr.write);
+
+              ['error', 'warn', 'info', 'verbose', 'debug', 'silly'].forEach(function(logLevel) {
+                sharedLogger.logger[logLevel]('This is a test');
+                sandbox.assert.notCalled(process.stdout.write);
+                sandbox.assert.notCalled(process.stderr.write);
+              });
+
+              sandbox.restore();
             });
         });
     });
