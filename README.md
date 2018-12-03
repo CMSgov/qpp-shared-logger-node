@@ -148,6 +148,7 @@ Name | Email | EUA Id | Company
 --- | --- | --- | ---
 Scott Haselton | scott.haselton@cms.hhs.gov | H98G |  USDS 
 Jonathan Julian | jonathan@adhocteam.us | JS1I | Ad Hoc
+Steve Love | steve@adhoc.team | LQI3 | Ad Hoc
 
 ## Resources
 * https://jira.cms.gov/browse/QPPELIG-130
