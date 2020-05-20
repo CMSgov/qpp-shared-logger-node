@@ -95,10 +95,10 @@ function buildAccessLogStream(options) {
                 size: `${options.accessLog.rotationMaxsize ||
                     defaultRotationMaxsize}B`,
                 interval: '1d' // rotate on daily intervals like the other logs
-            }
+            };
 
             // Only add if set
-            if(options.accessLog.maxFiles) {
+            if (options.accessLog.maxFiles) {
                 streamOptions.maxFiles = options.accessLog.maxFiles;
             }
 
@@ -177,20 +177,20 @@ const defaultRedactKeys = [
 // A winston-equivalent logger used for logLevel='none' that just
 // suppresses all output
 const noneLogger = {
-  log: function() {},
-  error: function() {},
-  warn: function() {},
-  info: function() {},
-  verbose: function() {},
-  debug: function() {},
-  silly: function() {},
-  transports: []
+    log: function() {},
+    error: function() {},
+    warn: function() {},
+    info: function() {},
+    verbose: function() {},
+    debug: function() {},
+    silly: function() {},
+    transports: []
 };
 
 // A morgan-equivalent logger used for format='none' that suppresses
 // all output
-const noneAccessLogger = function(req, res, next) {
-};
+// eslint-disable-next-line no-unused-vars
+const noneAccessLogger = function(req, res, next) {};
 
 let sharedLogger = {
     accessLogger: undefined,
@@ -240,6 +240,27 @@ let sharedLogger = {
         //
         options.accessLog = options.accessLog || {};
         if (accessLogEnabled(options)) {
+            morgan.token('url', req => {
+                if (!req.query) {
+                    return req.url;
+                }
+                // redact the query parameters
+                const scrubbedQuery = scrubber(
+                    options.redactKeys || defaultRedactKeys
+                )(null, null, req.query);
+                // map each query parameter into a 'key=value' string, and join them all with '&' separators
+                const scrubbedQueryParameters = Object.entries(
+                    scrubbedQuery || {}
+                )
+                    .map(query => `${query[0]}=${query[1]}`)
+                    .join('&');
+                return (
+                    req.pathname +
+                    (scrubbedQueryParameters
+                        ? '?' + scrubbedQueryParameters
+                        : '')
+                );
+            });
             this.accessLogger = morgan(accessLogFormat(options), {
                 stream: buildAccessLogStream(options)
             });

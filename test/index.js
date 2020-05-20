@@ -104,6 +104,34 @@ describe('sharedLogger', function() {
                     done();
                 }, 5); // give the fs a moment to write the file
             });
+            it('should log redacted http requests to a file', function(done) {
+                truncateFile(`${TEST_LOG_DIR}/access.log`);
+
+                const res = {};
+                const next = () => {};
+                sharedLogger.accessLogger(
+                    Object.assign(
+                        { pathname: '/index.html', query: { tin: '123' } },
+                        req
+                    ), // add PII to query
+                    res,
+                    next
+                );
+
+                setTimeout(() => {
+                    let data = fs.readFileSync(
+                        `${TEST_LOG_DIR}/access.log`,
+                        'utf8'
+                    );
+                    let logLines = data.split('\n');
+                    assert.isAtMost(logLines.length, 2);
+                    assert.match(
+                        logLines[0],
+                        /GET \/index.html\?tin=\[REDACTED\]/
+                    );
+                    done();
+                }, 5); // give the fs a moment to write the file
+            });
         });
 
         describe('when configured with log rotation', function() {
@@ -156,17 +184,17 @@ describe('sharedLogger', function() {
             });
 
             it('should silently suppress log messages', function() {
-              const sandbox = sinon.sandbox.create();
-              sandbox.spy(process.stdout, 'write');
-              sandbox.spy(process.stderr, 'write');
+                const sandbox = sinon.sandbox.create();
+                sandbox.spy(process.stdout, 'write');
+                sandbox.spy(process.stderr, 'write');
 
-              const res = {};
-              const next = () => {};
+                const res = {};
+                const next = () => {};
 
-              sharedLogger.accessLogger(req, res, next);
-              sandbox.assert.notCalled(process.stdout.write);
-              sandbox.assert.notCalled(process.stderr.write);
-              sandbox.restore();
+                sharedLogger.accessLogger(req, res, next);
+                sandbox.assert.notCalled(process.stdout.write);
+                sandbox.assert.notCalled(process.stderr.write);
+                sandbox.restore();
             });
         });
     });
@@ -403,21 +431,28 @@ describe('sharedLogger', function() {
             });
 
             it('should silently suppress logger calls', function() {
-              const sandbox = sinon.sandbox.create();
-              sandbox.spy(process.stdout, 'write');
-              sandbox.spy(process.stderr, 'write');
+                const sandbox = sinon.sandbox.create();
+                sandbox.spy(process.stdout, 'write');
+                sandbox.spy(process.stderr, 'write');
 
-              sharedLogger.logger.log('warn', 'This is a test');
-              sandbox.assert.notCalled(process.stdout.write);
-              sandbox.assert.notCalled(process.stderr.write);
-
-              ['error', 'warn', 'info', 'verbose', 'debug', 'silly'].forEach(function(logLevel) {
-                sharedLogger.logger[logLevel]('This is a test');
+                sharedLogger.logger.log('warn', 'This is a test');
                 sandbox.assert.notCalled(process.stdout.write);
                 sandbox.assert.notCalled(process.stderr.write);
-              });
 
-              sandbox.restore();
+                [
+                    'error',
+                    'warn',
+                    'info',
+                    'verbose',
+                    'debug',
+                    'silly'
+                ].forEach(function(logLevel) {
+                    sharedLogger.logger[logLevel]('This is a test');
+                    sandbox.assert.notCalled(process.stdout.write);
+                    sandbox.assert.notCalled(process.stderr.write);
+                });
+
+                sandbox.restore();
             });
         });
     });
