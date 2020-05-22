@@ -1,10 +1,10 @@
-'use strict';
+import { Options } from './options';
 
-function logFilename(options) {
+export function logFilename(options) {
     return `${options.logFilenamePrefix || 'app'}`;
 }
 
-function accessLogFilename(options) {
+export function accessLogFilename(options: Options) {
     return `${options.accessLog.logFilenamePrefix || 'access'}`;
 }
 
@@ -13,7 +13,7 @@ function accessLogFilename(options) {
  * @see https://www.npmjs.com/package/rotating-file-stream
  * @return {Function}         a fn to build the filename based on date and index
  */
-function accessLogFilenameGenerator(options) {
+export function accessLogFilenameGenerator(options: Options) {
     return function(time, index) {
         const prefix = accessLogFilename(options);
         if (!time) {
@@ -29,7 +29,3 @@ function accessLogFilenameGenerator(options) {
         return `${prefix}.${dateStr}.log${indexStr}`;
     };
 }
-
-module.exports.logFilename = logFilename;
-module.exports.accessLogFilename = accessLogFilename;
-module.exports.accessLogFilenameGenerator = accessLogFilenameGenerator;

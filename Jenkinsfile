@@ -1,34 +1,52 @@
+library "qpp-devops"
+
+def jobName = JOB_NAME.replaceAll(/\/\w+%2F/,'-').toLowerCase()
+def containerRegistry = "968524040713.dkr.ecr.us-east-1.amazonaws.com"
+def workspace = "workspace/${jobName}"
+
 pipeline {
-  agent any
+  agent {
+    node {
+      label 'docker-agent'
+      customWorkspace workspace
+    }
+  }
+
   stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
+    stage('Build & Test') {
+      agent {
+        dockerfile {
+          label 'docker-agent'
+        }
       }
-    }
 
-    stage('Build') {
-      steps {
-        sh 'yarn'
-      }
-    }
-
-    stage('Test') {
       environment {
         TEST_LOG_DIR = 'logs'
+        NODE_ENV = 'test'
+        npm_config_cache = 'npm-cache'
+        HOME = '.'
       }
+
       steps {
-        sh 'yarn nsp'
-        sh 'yarn lint'
-        sh 'yarn test'
+        // Build
+        timeout(10) {
+          sh 'node --version'
+          sh 'npm --version'
+          sh 'npm i'
+        }
+
+        // Test
+        sh 'npm run lint'
+        sh 'npm test'
       }
     }
+  }
 
-    stage('Cleanup') {
-      steps {
-        deleteDir()
+  post {
+    always {
+      timeout(10) {
+        cleanWs()
       }
     }
-
   }
 }

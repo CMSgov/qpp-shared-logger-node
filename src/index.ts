@@ -1,14 +1,14 @@
-'use strict';
+import * as winston from 'winston';
+import DailyRotateFile = require('winston-daily-rotate-file');
+import SplunkStreamEvent = require('winston-splunk-httplogger');
+import morgan = require('morgan'); // access log
+import RotatingFileStream from 'rotating-file-stream'; // for morgan
+import fs = require('fs');
+import filenames = require('./filenames');
+import { Scrubber } from './scrubber';
+import { Options } from './options';
 
-const winston = require('winston');
-require('winston-daily-rotate-file');
-const morgan = require('morgan'); // access log
-const rotatingFileStream = require('rotating-file-stream'); // for morgan
-const fs = require('fs');
-const filenames = require('./filenames');
-const scrubber = require('./scrubber');
-
-function defaultLogDirByEnvironment(options) {
+function defaultLogDirByEnvironment(options: Options) {
     switch (options.environment) {
         case 'production':
             return `/var/log/qpp-service/${options.projectSlug}`;
@@ -19,24 +19,24 @@ function defaultLogDirByEnvironment(options) {
     }
 }
 
-function logDirectory(options) {
+function logDirectory(options: Options) {
     return options.logDirectory || defaultLogDirByEnvironment(options);
 }
 
-function accessLogDirectory(options) {
+function accessLogDirectory(options: Options) {
     return (
         options.accessLog.logDirectory || defaultLogDirByEnvironment(options)
     );
 }
 
-function logToConsole(options) {
+function logToConsole(options: Options) {
     return (
         options.logDirectory === 'console' ||
         (!options.logDirectory && options.environment === 'development')
     );
 }
 
-function accessLogToConsole(options) {
+function accessLogToConsole(options: Options) {
     return (
         options.accessLog.logDirectory === 'console' ||
         (!options.accessLog.logDirectory &&
@@ -47,45 +47,18 @@ function accessLogToConsole(options) {
 let tzOffset = new Date().getTimezoneOffset() * 60 * 1000; //convert minutes to milliseconds
 
 function localTimestamp() {
-    var localISOTime = new Date(Date.now() - tzOffset)
+    const localISOTime = new Date(Date.now() - tzOffset)
         .toISOString()
         .slice(0, -1); // remove the "Z"
     return localISOTime;
 }
 
-function buildLogTransport(options) {
-    if (logToConsole(options)) {
-        return new winston.transports.Console({
-            colorize: Boolean(options.logColorize),
-            timestamp: localTimestamp
-        });
-    } else {
-        if (options.rotationMaxsize !== 'none') {
-            return new winston.transports.DailyRotateFile({
-                filename: `${logDirectory(options)}/${filenames.logFilename(
-                    options
-                )}`,
-                label: options.projectSlug,
-                datePattern: options.logFilenameSuffix || '.yyyyMMdd.log',
-                maxsize: options.rotationMaxsize || defaultRotationMaxsize,
-                colorize: Boolean(options.logColorize),
-                timestamp: localTimestamp,
-                maxDays: options.maxDays || defaultRotationMaxDays
-            });
-        } else {
-            return new winston.transports.File({
-                filename: `${logDirectory(options)}/${filenames.logFilename(
-                    options
-                )}.log`,
-                label: options.projectSlug,
-                colorize: Boolean(options.logColorize),
-                timestamp: localTimestamp
-            });
-        }
-    }
-}
+const localTimestampFormat = winston.format(info => {
+    info.timestamp = localTimestamp();
+    return info;
+});
 
-function buildAccessLogStream(options) {
+function buildAccessLogStream(options: Options) {
     if (accessLogToConsole(options)) {
         return undefined; // morgan uses stdout by default
     } else {
@@ -95,14 +68,14 @@ function buildAccessLogStream(options) {
                 size: `${options.accessLog.rotationMaxsize ||
                     defaultRotationMaxsize}B`,
                 interval: '1d' // rotate on daily intervals like the other logs
-            };
+            } as any;
 
             // Only add if set
             if (options.accessLog.maxFiles) {
                 streamOptions.maxFiles = options.accessLog.maxFiles;
             }
 
-            return rotatingFileStream(
+            return RotatingFileStream(
                 filenames.accessLogFilenameGenerator(options),
                 streamOptions
             );
@@ -126,11 +99,11 @@ const defaultLevelByEnvironment = {
     production: 'info'
 };
 
-function logEnabled(options) {
+function logEnabled(options: Options) {
     return options.logLevel !== 'none';
 }
 
-function logLevel(options) {
+function logLevel(options: Options) {
     return (
         options.logLevel ||
         defaultLevelByEnvironment[options.environment] ||
@@ -144,7 +117,7 @@ const defaultAccessLogFormatByEnvironment = {
     production: 'combined'
 };
 
-function accessLogFormat(options) {
+function accessLogFormat(options: Options) {
     return (
         options.accessLog.format ||
         defaultAccessLogFormatByEnvironment[options.environment] ||
@@ -152,27 +125,9 @@ function accessLogFormat(options) {
     );
 }
 
-function accessLogEnabled(options) {
+function accessLogEnabled(options: Options) {
     return options.accessLog.format !== 'none';
 }
-
-const defaultRedactKeys = [
-    'authorization',
-    'email',
-    'firstname',
-    'lastname',
-    'login',
-    'password',
-    'practice_tin',
-    'ptan',
-    'qpp-provider-transaction-access-number',
-    'qpp-taxpayer-identification-number',
-    'tin',
-    'tin_num',
-    'userid',
-    'username',
-    'taxpayerIdentificationNumber'
-];
 
 // A winston-equivalent logger used for logLevel='none' that just
 // suppresses all output
@@ -189,19 +144,17 @@ const noneLogger = {
 
 // A morgan-equivalent logger used for format='none' that suppresses
 // all output
-// eslint-disable-next-line no-unused-vars
 const noneAccessLogger = function(req, res, next) {};
 
-let sharedLogger = {
-    accessLogger: undefined,
-    logger: undefined,
-    configured: false,
+class SharedLogger {
+    accessLogger = undefined;
+    logger = undefined;
+    configured = false;
 
     /**
-    * Configure the logger.
-    * @param  {Object} options config options
-    */
-    configure: function(options) {
+	* Configure the logger.
+	*/
+    configure(options: Options) {
         if (this.configured) {
             // eslint-disable-next-line no-console
             console.error(
@@ -213,24 +166,54 @@ let sharedLogger = {
         if (!options) {
             throw new Error('options are required');
         }
+
         if (!options.environment) {
             options.environment = process.env.NODE_ENV || 'development';
         }
         if (!options.projectSlug) {
             throw new Error('projectSlug is required');
         }
+        if (options.logTimestamps === undefined) {
+            options.logTimestamps = true;
+        }
 
         //
         // winston: application logger
         //
         if (logEnabled(options)) {
-            this.logger = new winston.Logger({
+            const scrubber = new Scrubber(options.redactKeys || []);
+            const formats = [
+                scrubber.format(),
+                winston.format.label({ label: options.projectSlug })
+            ];
+
+            if (options.logColorize === true) {
+                formats.push(winston.format.colorize());
+            }
+            if (options.logTimestamps === true) {
+                formats.push(localTimestampFormat());
+            }
+
+            switch (options.format) {
+                case 'simple':
+                    formats.push(winston.format.simple());
+                    break;
+                case 'prettyPrint':
+                    formats.push(winston.format.prettyPrint());
+                    break;
+                case 'logstash':
+                    formats.push(winston.format.logstash());
+                    break;
+                case 'json':
+                default:
+                    formats.push(winston.format.json());
+            }
+
+            this.logger = winston.createLogger({
                 level: logLevel(options),
-                transports: [buildLogTransport(options)]
+                transports: this.buildLogTransports(options),
+                format: winston.format.combine(...formats)
             });
-            this.logger.rewriters.push(
-                scrubber(options.redactKeys || defaultRedactKeys)
-            );
         } else {
             this.logger = noneLogger;
         }
@@ -245,17 +228,16 @@ let sharedLogger = {
                     return req.url;
                 }
                 // redact the query parameters
-                const scrubbedQuery = scrubber(
-                    options.redactKeys || defaultRedactKeys
-                )(null, null, req.query);
-                // map each query parameter into a 'key=value' string, and join them all with '&' separators
+                const scrubber = new Scrubber(options.redactKeys || []);
+                const scrubbedQuery = scrubber.scrub(req.query);
                 const scrubbedQueryParameters = Object.entries(
                     scrubbedQuery || {}
                 )
                     .map(query => `${query[0]}=${query[1]}`)
                     .join('&');
+
                 return (
-                    req.pathname +
+                    req['pathname'] +
                     (scrubbedQueryParameters
                         ? '?' + scrubbedQueryParameters
                         : '')
@@ -267,14 +249,14 @@ let sharedLogger = {
         } else {
             this.accessLogger = noneAccessLogger;
         }
-    },
+    }
 
     /**
-     * Return a logger that includes the given fields with all entries.
-     * @param  {Object} fields metadata to include with logs
-     */
-    contextLogger: function(fields) {
-        let logger = {};
+	 * Return a logger that includes the given fields with all entries.
+	 * @param  {Object} fields metadata to include with logs
+	 */
+    contextLogger(fields) {
+        let logger = {} as any;
         logger.log = (level, msg, meta) =>
             this.logger.log(level, msg, Object.assign({}, fields, meta));
         logger.error = (msg, meta) => logger.log('error', msg, meta);
@@ -285,8 +267,51 @@ let sharedLogger = {
         logger.silly = (msg, meta) => logger.log('silly', msg, meta);
         return logger;
     }
-};
 
-module.exports = sharedLogger;
-module.exports.defaultRedactKeys = defaultRedactKeys;
+    buildLogTransports(options: Options) {
+        const transports = [];
+        if (logToConsole(options)) {
+            transports.push(new winston.transports.Console());
+        } else {
+            if (options.rotationMaxsize !== 'none') {
+                transports.push(
+                    new DailyRotateFile({
+                        filename: `${logDirectory(
+                            options
+                        )}/${filenames.logFilename(
+                            options
+                        )}.%DATE%.${options.logFileExtension || 'log'}`,
+                        datePattern: options.datePattern || 'YYYYMMDD',
+                        maxSize:
+                            options.rotationMaxsize || defaultRotationMaxsize,
+                        maxFiles: `${options.maxDays ||
+                            defaultRotationMaxDays}d`
+                    })
+                );
+            } else {
+                transports.push(
+                    new winston.transports.File({
+                        filename: `${logDirectory(
+                            options
+                        )}/${filenames.logFilename(options)}.log`
+                    })
+                );
+            }
+        }
+
+        if (options.splunkSettings) {
+            if (!options.splunkSettings.index)
+                options.splunkSettings.index = 'qpp';
+            transports.push(
+                new SplunkStreamEvent({ splunk: options.splunkSettings })
+            );
+        }
+
+        return transports;
+    }
+}
+
+export const sharedLogger = new SharedLogger();
+export type Logger = typeof sharedLogger.logger;
+export * from './options';
 module.exports.localTimestamp = localTimestamp;

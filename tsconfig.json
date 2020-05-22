@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "build",
+    "target": "es2017",
+    "lib": [
+      "es2017",
+      "esnext.asynciterable",
+      "dom"
+    ],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "maxNodeModuleJsDepth": 2,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "keyofStringsOnly": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "typeRoots": [
+      "./@types",
+      "./node_modules/@types"
+    ],
+    "declaration": true
+  },
+  "include": [
+    "./@types",
+    "./src/**/*",
+    "index.ts",
+    "package.json"
+  ]
+}

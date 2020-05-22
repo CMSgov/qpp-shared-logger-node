@@ -1,34 +1,49 @@
 {
     "name": "qpp-shared-logger-node",
-    "version": "1.5.0",
+    "version": "2.0.0",
     "description": "Common QPP logger that is shared across the different teams",
-    "main": "src/index.js",
+    "main": "build/src/index.js",
+    "types": "build/src/index.d.ts",
     "repository": "https://github.cms.gov/qpp/qpp-shared-logger-node.git",
-    "author": "Jonathan Julian <jonathan@adhocteam.us>",
+    "author": "Branon Barrett <branon.barrett@semanticbits.com>",
     "license": "UNLICENSED",
     "dependencies": {
         "morgan": "^1.9.0",
         "rotating-file-stream": "^1.3.2",
-        "winston": "^2.4.0",
-        "winston-daily-rotate-file": "^1.7.2"
+        "winston": "^3.2.1",
+        "winston-daily-rotate-file": "^4.4.2",
+        "winston-splunk-httplogger": "^2.3.1"
     },
     "devDependencies": {
+        "@types/chai": "^4.2.7",
+        "@types/mocha": "^5.2.7",
+        "@types/morgan": "^1.7.37",
+        "@types/node": "^13.5.0",
+        "@types/winston": "^2.4.4",
         "chai": "^4.1.2",
         "eslint": "^4.10.0",
         "eslint-config-prettier": "^2.7.0",
         "eslint-plugin-prettier": "^2.3.1",
-        "mocha": "^4.0.1",
+        "mocha": "^7.0.1",
         "moment": "^2.19.1",
-        "nsp": "^3.1.0",
-        "nyc": "^11.2.1",
+        "nyc": "^15.0.0",
         "prettier": "1.7.4",
-        "sinon": "^4.0.2"
+        "rimraf": "^3.0.0",
+        "sinon": "^4.0.2",
+        "ts-node": "^6.0.2",
+        "ts-node-dev": "^1.0.0-pre.26",
+        "tsconfig-paths": "^3.3.2",
+        "tslint": "^5.11.0",
+        "tslint-config-airbnb": "^5.9.2",
+        "typescript": "^3.2.1"
     },
     "scripts": {
-        "format": "prettier --write \"{src,test}/**/*.js\"",
+        "format": "prettier --write '{src,test}/**/*.ts'",
         "lint": "eslint ./src ./test",
-        "nsp": "nsp check",
-        "test": "nyc mocha ./test --recursive"
+        "test": "nyc node_modules/.bin/mocha './test/**/*.*(js|ts)'",
+        "tsc": "rimraf ./build && tsc",
+        "ts-node": "ts-node",
+        "prepublishOnly": "rimraf ./build && npm run tsc"
     },
     "keywords": [
         "QPP",
@@ -41,6 +56,16 @@
         "reporter": [
             "html",
             "text"
+        ],
+        "check-coverage": true,
+        "sourceMap": true,
+        "include": "src",
+        "require": [
+            "ts-node/register"
+        ],
+        "extension": [
+            ".ts",
+            ".js"
         ]
     }
 }
