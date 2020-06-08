@@ -18,22 +18,22 @@ const defaultRedactKeys = [
     'tin_num',
     'userid',
     'username',
-    'taxpayerIdentificationNumber'
+    'taxpayerIdentificationNumber',
 ];
 
 export class Scrubber {
     blacklist = [];
     // A winston Formatter that removes all meta
     // See https://github.com/winstonjs/winston/blob/HEAD/UPGRADE-3.0.md#rewriters for upgrade info
-    format = winston.format(info => this.scrub(info));
+    format = winston.format((info) => this.scrub(info));
 
     constructor(redactKeys: string[]) {
         // merge with defaults
         this.blacklist = [
             ...new Set([
-                ...redactKeys.map(key => key.toLowerCase()),
-                ...defaultRedactKeys
-            ])
+                ...redactKeys.map((key) => key.toLowerCase()),
+                ...defaultRedactKeys,
+            ]),
         ];
     }
 

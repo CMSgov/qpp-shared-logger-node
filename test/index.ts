@@ -9,7 +9,7 @@ const TEST_LOG_DIR = process.env.TEST_LOG_DIR || '/tmp';
 
 // A winston Transport that sends log messages to a spy, so
 // logging can be verified
-let SpyTransport = options => {
+let SpyTransport = (options) => {
     options = options || {};
     this.level = options.level || 'silly';
     this.spy = options.spy;
@@ -21,7 +21,7 @@ let SpyTransport = options => {
         log: (level, msg, meta, callback) => {
             this.spy(level, msg, meta);
             callback(null, true);
-        }
+        },
     };
 };
 
@@ -48,18 +48,19 @@ const req = {
     httpVersionMinor: 1,
     ip: '192.168.1.101',
     method: 'GET',
-    url: '/index.html'
+    baseUrl: '/index.html',
+    query: {},
 };
 
-describe('sharedLogger', function() {
-    beforeEach(function() {
+describe('sharedLogger', function () {
+    beforeEach(function () {
         sharedLogger.configured = false;
     });
-    describe('when configured with missing values', function() {
+    describe('when configured with missing values', function () {
         const sandbox = sinon.sandbox.create();
         afterEach(() => sandbox.restore());
 
-        it('should throw an error', function() {
+        it('should throw an error', function () {
             assert.throws(
                 () => sharedLogger.configure(null),
                 Error,
@@ -78,7 +79,7 @@ describe('sharedLogger', function() {
                 format: 'json',
                 projectSlug: 'test',
                 logDirectory: 'console',
-                logTimestamps: false
+                logTimestamps: false,
             };
             const spy = sandbox.spy(process.stdout, 'write');
             sharedLogger.configure(options);
@@ -94,7 +95,7 @@ describe('sharedLogger', function() {
                 format: 'prettyPrint',
                 projectSlug: 'test',
                 logDirectory: 'console',
-                logTimestamps: false
+                logTimestamps: false,
             };
             const spy = sandbox.spy(process.stdout, 'write');
             sharedLogger.configure(options);
@@ -110,7 +111,7 @@ describe('sharedLogger', function() {
                 format: 'logstash',
                 projectSlug: 'test',
                 logDirectory: 'console',
-                logTimestamps: false
+                logTimestamps: false,
             };
             const spy = sandbox.spy(process.stdout, 'write');
             sharedLogger.configure(options);
@@ -122,26 +123,26 @@ describe('sharedLogger', function() {
         });
     });
 
-    context('#accessLogger', function() {
-        before(function() {
+    context('#accessLogger', function () {
+        before(function () {
             sharedLogger.configured = false;
         });
-        describe('when configured', function() {
-            before(function() {
+        describe('when configured', function () {
+            before(function () {
                 sharedLogger.configure({
                     environment: 'development',
                     projectSlug: 'tester',
                     accessLog: {
                         logDirectory: TEST_LOG_DIR,
                         format: 'combined',
-                        maxFiles: 10
-                    }
+                        maxFiles: 10,
+                    },
                 });
             });
-            after(function() {
+            after(function () {
                 rmFile(`${TEST_LOG_DIR}/access.log`);
             });
-            it('should log http requests to a file', function(done) {
+            it('should log http requests to a file', function (done) {
                 truncateFile(`${TEST_LOG_DIR}/access.log`);
 
                 const res = {};
@@ -160,16 +161,44 @@ describe('sharedLogger', function() {
                 }, 20); // give the fs a moment to write the file
             });
 
-            it('should log redacted http requests to a file', function(done) {
+            it('should use `baseUrl` to log http requests to a file', function (done) {
                 truncateFile(`${TEST_LOG_DIR}/access.log`);
 
                 const res = {};
                 const next = () => {};
                 sharedLogger.accessLogger(
-                    Object.assign(
-                        { pathname: '/index.html', query: { tin: '123' } },
-                        req
-                    ), // add PII to query
+                    {
+                        ...req,
+                        pathname: undefined,
+                        baseUrl: '/index.html',
+                    },
+                    res,
+                    next
+                );
+
+                setTimeout(() => {
+                    let data = fs.readFileSync(
+                        `${TEST_LOG_DIR}/access.log`,
+                        'utf8'
+                    );
+                    let logLines = data.split('\n');
+                    assert.isAtMost(logLines.length, 2);
+                    assert.match(logLines[0], /GET \/index.html/);
+                    done();
+                }, 20); // give the fs a moment to write the file
+            });
+
+            it('should log redacted http requests to a file', function (done) {
+                truncateFile(`${TEST_LOG_DIR}/access.log`);
+
+                const res = {};
+                const next = () => {};
+                sharedLogger.accessLogger(
+                    {
+                        ...req,
+                        pathname: '/index.html',
+                        query: { tin: '123' },
+                    },
                     res,
                     next
                 );
@@ -190,8 +219,8 @@ describe('sharedLogger', function() {
             });
         });
 
-        describe('when configured with log rotation', function() {
-            before(function() {
+        describe('when configured with log rotation', function () {
+            before(function () {
                 sharedLogger.configure({
                     environment: 'production',
                     projectSlug: 'tester',
@@ -199,15 +228,15 @@ describe('sharedLogger', function() {
                     logColorize: true,
                     accessLog: {
                         logDirectory: TEST_LOG_DIR,
-                        rotationMaxsize: 100 // bytes
-                    }
+                        rotationMaxsize: 100, // bytes
+                    },
                 });
             });
-            after(function() {
+            after(function () {
                 rmFile(`${TEST_LOG_DIR}/access.log`);
             });
 
-            it('should log http requests to a file', function(done) {
+            it('should log http requests to a file', function (done) {
                 truncateFile(`${TEST_LOG_DIR}/access.log`);
 
                 const res = {};
@@ -227,20 +256,20 @@ describe('sharedLogger', function() {
             });
         });
 
-        describe('when disabled', function() {
-            before(function() {
+        describe('when disabled', function () {
+            before(function () {
                 sharedLogger.configure({
                     environment: 'development',
                     projectSlug: 'tester',
                     logLevel: 'none',
                     accessLog: {
                         format: 'none',
-                        logDirectory: 'console'
-                    }
+                        logDirectory: 'console',
+                    },
                 });
             });
 
-            it('should silently suppress log messages', function() {
+            it('should silently suppress log messages', function () {
                 const sandbox = sinon.sandbox.create();
                 sandbox.spy(process.stdout, 'write');
                 sandbox.spy(process.stderr, 'write');
@@ -256,8 +285,8 @@ describe('sharedLogger', function() {
         });
     });
 
-    context('#logger', function() {
-        describe('when configured', function() {
+    context('#logger', function () {
+        describe('when configured', function () {
             let spy;
             let sandbox;
             let loggerOptions = {
@@ -269,31 +298,31 @@ describe('sharedLogger', function() {
                 logLevel: 'debug',
                 accessLog: {
                     logDirectory: TEST_LOG_DIR,
-                    rotationMaxsize: 'none'
+                    rotationMaxsize: 'none',
                 },
-                format: 'simple'
+                format: 'simple',
             };
 
-            before(function() {
+            before(function () {
                 sandbox = sinon.sandbox.create();
 
                 sharedLogger.configure(loggerOptions);
             });
 
-            beforeEach(function() {
+            beforeEach(function () {
                 spy = sandbox.spy();
                 sharedLogger.logger.add(
                     SpyTransport({
                         spy: spy,
-                        level: 'debug'
+                        level: 'debug',
                     })
                 );
             });
-            afterEach(function() {
+            afterEach(function () {
                 sharedLogger.logger.remove('SpyTransport');
                 sandbox.restore();
             });
-            after(function() {
+            after(function () {
                 // rmFile(`${TEST_LOG_DIR}/ktke.log`);
                 rmFile(`${TEST_LOG_DIR}/access.log`);
             });
@@ -311,7 +340,7 @@ describe('sharedLogger', function() {
                 assert.isNotNull(loggerOptions.environment);
             });
 
-            it('should have log level -debug-', function() {
+            it('should have log level -debug-', function () {
                 sharedLogger.logger.debug('DEBUG', {});
                 sharedLogger.logger.silly('SILLY', {});
 
@@ -319,7 +348,7 @@ describe('sharedLogger', function() {
                 assert.equal(spy.getCall(1).lastArg.level, 'silly');
             });
 
-            it('should log to a file', function(done) {
+            it('should log to a file', function (done) {
                 truncateFile(`${TEST_LOG_DIR}/ktke.log`);
 
                 sharedLogger.logger.debug('logging to file', {});
@@ -337,11 +366,11 @@ describe('sharedLogger', function() {
             });
         });
 
-        describe('when configured with log rotation', function() {
+        describe('when configured with log rotation', function () {
             const logFilename = `${TEST_LOG_DIR}/ktke.${moment()
                 .utc()
                 .format('YYYYMMDD')}.log`;
-            before(function() {
+            before(function () {
                 sharedLogger.configure({
                     environment: 'production',
                     projectSlug: 'tester',
@@ -350,16 +379,16 @@ describe('sharedLogger', function() {
                     rotationMaxsize: 1000, // bytes
                     logTimestamps: true,
                     accessLog: {
-                        logDirectory: TEST_LOG_DIR
-                    }
+                        logDirectory: TEST_LOG_DIR,
+                    },
                 });
             });
-            after(function() {
+            after(function () {
                 rmFile(logFilename);
                 rmFile(`${TEST_LOG_DIR}/access.log`);
             });
 
-            it('should log to a file', function(done) {
+            it('should log to a file', function (done) {
                 truncateFile(logFilename);
 
                 sharedLogger.logger.warn('logging to file', {});
@@ -373,9 +402,7 @@ describe('sharedLogger', function() {
                 }, 5); // give the fs a moment to write the file
             });
 
-            it('should emit timestamp in the local server time (not GMT)', function(
-                done
-            ) {
+            it('should emit timestamp in the local server time (not GMT)', function (done) {
                 truncateFile(logFilename);
                 // This is the format that Splunk expects: TIME_FORMAT = %Y-%m-%dT%T.%3N
                 // This corresponds to 2017-01-01T03:04:05.123 (note no TZ info, it's local time)
@@ -404,28 +431,28 @@ describe('sharedLogger', function() {
             });
         });
 
-        describe('when configured', function() {
+        describe('when configured', function () {
             let stdoutSpy;
             let sandbox;
-            before(function() {
+            before(function () {
                 sharedLogger.configure({
                     environment: 'development',
                     projectSlug: 'tester',
                     logDirectory: 'console',
                     logLevel: 'warn',
                     logTimestamps: false,
-                    format: 'simple'
+                    format: 'simple',
                 });
                 sandbox = sinon.sandbox.create();
             });
-            beforeEach(function() {
+            beforeEach(function () {
                 stdoutSpy = sandbox.spy(process.stdout, 'write');
             });
-            afterEach(function() {
+            afterEach(function () {
                 sandbox.restore();
             });
 
-            it('should have log level -warn-', function() {
+            it('should have log level -warn-', function () {
                 sharedLogger.logger.warn('WARN', {});
                 sharedLogger.logger.info('INFO', {});
 
@@ -436,7 +463,7 @@ describe('sharedLogger', function() {
                 assert.isNull(stdoutSpy.getCall(1));
             });
 
-            it('should log to stdout', function() {
+            it('should log to stdout', function () {
                 sharedLogger.logger.warn('MESSAGE', {});
 
                 sandbox.assert.calledWithMatch(
@@ -445,7 +472,7 @@ describe('sharedLogger', function() {
                 );
             });
 
-            it('should log context fields', function() {
+            it('should log context fields', function () {
                 const logger2 = sharedLogger.contextLogger({ x: 1, y: 5 });
                 const logger3 = sharedLogger.contextLogger({ x: 2, z: 8 });
 
@@ -483,7 +510,7 @@ describe('sharedLogger', function() {
                 );
             });
 
-            it('should redact configured PII', function() {
+            it('should redact configured PII', function () {
                 // Password is redacted by defaults
                 sharedLogger.logger.warn('MESSAGE', { password: 'ABCDEF' });
 
@@ -494,20 +521,20 @@ describe('sharedLogger', function() {
                 );
             });
         });
-        describe('when disabled', function() {
-            before(function() {
+        describe('when disabled', function () {
+            before(function () {
                 sharedLogger.configure({
                     environment: 'development',
                     logDirectory: 'console',
                     projectSlug: 'tester',
                     logLevel: 'none',
                     accessLog: {
-                        format: 'none'
-                    }
+                        format: 'none',
+                    },
                 });
             });
 
-            it('should silently suppress logger calls', function() {
+            it('should silently suppress logger calls', function () {
                 const sandbox = sinon.sandbox.create();
                 sandbox.spy(process.stdout, 'write');
                 sandbox.spy(process.stderr, 'write');
@@ -516,18 +543,13 @@ describe('sharedLogger', function() {
                 sandbox.assert.notCalled(process.stdout.write);
                 sandbox.assert.notCalled(process.stderr.write);
 
-                [
-                    'error',
-                    'warn',
-                    'info',
-                    'verbose',
-                    'debug',
-                    'silly'
-                ].forEach(function(logLevel) {
-                    sharedLogger.logger[logLevel]('This is a test');
-                    sandbox.assert.notCalled(process.stdout.write);
-                    sandbox.assert.notCalled(process.stderr.write);
-                });
+                ['error', 'warn', 'info', 'verbose', 'debug', 'silly'].forEach(
+                    function (logLevel) {
+                        sharedLogger.logger[logLevel]('This is a test');
+                        sandbox.assert.notCalled(process.stdout.write);
+                        sandbox.assert.notCalled(process.stderr.write);
+                    }
+                );
 
                 sandbox.restore();
             });

@@ -53,7 +53,7 @@ function localTimestamp() {
     return localISOTime;
 }
 
-const localTimestampFormat = winston.format(info => {
+const localTimestampFormat = winston.format((info) => {
     info.timestamp = localTimestamp();
     return info;
 });
@@ -65,9 +65,10 @@ function buildAccessLogStream(options: Options) {
         if (options.accessLog.rotationMaxsize !== 'none') {
             const streamOptions = {
                 path: accessLogDirectory(options),
-                size: `${options.accessLog.rotationMaxsize ||
-                    defaultRotationMaxsize}B`,
-                interval: '1d' // rotate on daily intervals like the other logs
+                size: `${
+                    options.accessLog.rotationMaxsize || defaultRotationMaxsize
+                }B`,
+                interval: '1d', // rotate on daily intervals like the other logs
             } as any;
 
             // Only add if set
@@ -96,7 +97,7 @@ const defaultRotationMaxDays = 0; // Keep logs forever by default
 const defaultLevelByEnvironment = {
     development: 'debug',
     test: 'silly',
-    production: 'info'
+    production: 'info',
 };
 
 function logEnabled(options: Options) {
@@ -114,7 +115,7 @@ function logLevel(options: Options) {
 const defaultAccessLogFormatByEnvironment = {
     development: 'dev',
     test: 'combined',
-    production: 'combined'
+    production: 'combined',
 };
 
 function accessLogFormat(options: Options) {
@@ -132,19 +133,19 @@ function accessLogEnabled(options: Options) {
 // A winston-equivalent logger used for logLevel='none' that just
 // suppresses all output
 const noneLogger = {
-    log: function() {},
-    error: function() {},
-    warn: function() {},
-    info: function() {},
-    verbose: function() {},
-    debug: function() {},
-    silly: function() {},
-    transports: []
+    log: function () {},
+    error: function () {},
+    warn: function () {},
+    info: function () {},
+    verbose: function () {},
+    debug: function () {},
+    silly: function () {},
+    transports: [],
 };
 
 // A morgan-equivalent logger used for format='none' that suppresses
 // all output
-const noneAccessLogger = function(req, res, next) {};
+const noneAccessLogger = function (req, res, next) {};
 
 class SharedLogger {
     accessLogger = undefined;
@@ -152,8 +153,8 @@ class SharedLogger {
     configured = false;
 
     /**
-	* Configure the logger.
-	*/
+     * Configure the logger.
+     */
     configure(options: Options) {
         if (this.configured) {
             // eslint-disable-next-line no-console
@@ -184,7 +185,7 @@ class SharedLogger {
             const scrubber = new Scrubber(options.redactKeys || []);
             const formats = [
                 scrubber.format(),
-                winston.format.label({ label: options.projectSlug })
+                winston.format.label({ label: options.projectSlug }),
             ];
 
             if (options.logColorize === true) {
@@ -212,7 +213,7 @@ class SharedLogger {
             this.logger = winston.createLogger({
                 level: logLevel(options),
                 transports: this.buildLogTransports(options),
-                format: winston.format.combine(...formats)
+                format: winston.format.combine(...formats),
             });
         } else {
             this.logger = noneLogger;
@@ -223,9 +224,10 @@ class SharedLogger {
         //
         options.accessLog = options.accessLog || {};
         if (accessLogEnabled(options)) {
-            morgan.token('url', req => {
-                if (!req.query) {
-                    return req.url;
+            morgan.token('url', (req) => {
+                const url = req['pathname'] ?? req.baseUrl;
+                if (!req.query || Object.keys(req.query).length === 0) {
+                    return url;
                 }
                 // redact the query parameters
                 const scrubber = new Scrubber(options.redactKeys || []);
@@ -233,18 +235,18 @@ class SharedLogger {
                 const scrubbedQueryParameters = Object.entries(
                     scrubbedQuery || {}
                 )
-                    .map(query => `${query[0]}=${query[1]}`)
+                    .map((query) => `${query[0]}=${query[1]}`)
                     .join('&');
 
                 return (
-                    req['pathname'] +
+                    url +
                     (scrubbedQueryParameters
                         ? '?' + scrubbedQueryParameters
                         : '')
                 );
             });
             this.accessLogger = morgan(accessLogFormat(options), {
-                stream: buildAccessLogStream(options)
+                stream: buildAccessLogStream(options),
             });
         } else {
             this.accessLogger = noneAccessLogger;
@@ -252,9 +254,9 @@ class SharedLogger {
     }
 
     /**
-	 * Return a logger that includes the given fields with all entries.
-	 * @param  {Object} fields metadata to include with logs
-	 */
+     * Return a logger that includes the given fields with all entries.
+     * @param  {Object} fields metadata to include with logs
+     */
     contextLogger(fields) {
         let logger = {} as any;
         logger.log = (level, msg, meta) =>
@@ -278,14 +280,15 @@ class SharedLogger {
                     new DailyRotateFile({
                         filename: `${logDirectory(
                             options
-                        )}/${filenames.logFilename(
-                            options
-                        )}.%DATE%.${options.logFileExtension || 'log'}`,
+                        )}/${filenames.logFilename(options)}.%DATE%.${
+                            options.logFileExtension || 'log'
+                        }`,
                         datePattern: options.datePattern || 'YYYYMMDD',
                         maxSize:
                             options.rotationMaxsize || defaultRotationMaxsize,
-                        maxFiles: `${options.maxDays ||
-                            defaultRotationMaxDays}d`
+                        maxFiles: `${
+                            options.maxDays || defaultRotationMaxDays
+                        }d`,
                     })
                 );
             } else {
@@ -293,7 +296,7 @@ class SharedLogger {
                     new winston.transports.File({
                         filename: `${logDirectory(
                             options
-                        )}/${filenames.logFilename(options)}.log`
+                        )}/${filenames.logFilename(options)}.log`,
                     })
                 );
             }

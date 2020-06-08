@@ -14,7 +14,7 @@ export function accessLogFilename(options: Options) {
  * @return {Function}         a fn to build the filename based on date and index
  */
 export function accessLogFilenameGenerator(options: Options) {
-    return function(time, index) {
+    return function (time, index) {
         const prefix = accessLogFilename(options);
         if (!time) {
             return `${prefix}.log`;
