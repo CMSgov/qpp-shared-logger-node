@@ -55,10 +55,18 @@ function localTimestamp() {
 
 function buildLogTransport(options) {
     if (logToConsole(options)) {
-        return new winston.transports.Console({
+        const consoleOptions = {
             colorize: Boolean(options.logColorize),
             timestamp: localTimestamp
-        });
+        };
+
+        if (options.json) {
+            consoleOptions.json = true;
+            // Following necessary to output json on a single line
+            consoleOptions.stringify = obj => JSON.stringify(obj);
+        }
+
+        return new winston.transports.Console(consoleOptions);
     } else {
         if (options.rotationMaxsize !== 'none') {
             return new winston.transports.DailyRotateFile({
@@ -198,9 +206,9 @@ let sharedLogger = {
     configured: false,
 
     /**
-    * Configure the logger.
-    * @param  {Object} options config options
-    */
+     * Configure the logger.
+     * @param  {Object} options config options
+     */
     configure: function(options) {
         if (this.configured) {
             // eslint-disable-next-line no-console

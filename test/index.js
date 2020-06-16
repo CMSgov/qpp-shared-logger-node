@@ -295,9 +295,7 @@ describe('sharedLogger', function() {
                 }, 5); // give the fs a moment to write the file
             });
 
-            it('should emit timestamp in the local server time (not GMT)', function(
-                done
-            ) {
+            it('should emit timestamp in the local server time (not GMT)', function(done) {
                 truncateFile(logFilename);
                 // This is the format that Splunk expects: TIME_FORMAT = %Y-%m-%dT%T.%3N
                 // This corresponds to 2017-01-01T03:04:05.123 (note no TZ info, it's local time)
@@ -439,18 +437,13 @@ describe('sharedLogger', function() {
                 sandbox.assert.notCalled(process.stdout.write);
                 sandbox.assert.notCalled(process.stderr.write);
 
-                [
-                    'error',
-                    'warn',
-                    'info',
-                    'verbose',
-                    'debug',
-                    'silly'
-                ].forEach(function(logLevel) {
-                    sharedLogger.logger[logLevel]('This is a test');
-                    sandbox.assert.notCalled(process.stdout.write);
-                    sandbox.assert.notCalled(process.stderr.write);
-                });
+                ['error', 'warn', 'info', 'verbose', 'debug', 'silly'].forEach(
+                    function(logLevel) {
+                        sharedLogger.logger[logLevel]('This is a test');
+                        sandbox.assert.notCalled(process.stdout.write);
+                        sandbox.assert.notCalled(process.stderr.write);
+                    }
+                );
 
                 sandbox.restore();
             });
