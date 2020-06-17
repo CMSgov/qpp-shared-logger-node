@@ -225,6 +225,7 @@ describe('sharedLogger', function() {
                     spy: spy,
                     level: 'debug'
                 });
+                sandbox.spy(process.stdout, 'write');
             });
             afterEach(function() {
                 sharedLogger.logger.remove('SpyTransport');
@@ -321,6 +322,49 @@ describe('sharedLogger', function() {
 
                     done();
                 }, 5); // give the fs a moment to write the file
+            });
+        });
+
+        // Other tests verify that strings are written to stdout, this specifically
+        // verifies that json can be written to stdout
+        describe('when configured', function() {
+            let sandbox;
+            before(function() {
+                sharedLogger.configure({
+                    environment: 'development',
+                    projectSlug: 'tester',
+                    logDirectory: 'console',
+                    logLevel: 'info',
+                    json: true
+                });
+                sandbox = sinon.sandbox.create();
+            });
+
+            beforeEach(function() {
+                sandbox.spy(process.stdout, 'write');
+            });
+
+            afterEach(function() {
+                sandbox.restore();
+            });
+
+            it('should output json to stdout', function() {
+                sharedLogger.logger.info('write json');
+
+                sandbox.assert.calledOnce(process.stdout.write);
+
+                // Check that the argument was json
+                const arg = JSON.parse(process.stdout.write.getCall(0).args[0]);
+
+                // Check keys, alphabetically
+                assert.deepEqual(Object.keys(arg).sort(), [
+                    'level',
+                    'message',
+                    'timestamp'
+                ]);
+                assert.equal(arg.message, 'write json');
+                assert.equal(arg.level, 'info');
+                assert(arg.timestamp);
             });
         });
 
