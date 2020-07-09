@@ -117,6 +117,8 @@ Key | Description | Allowed Values | Default
 url | URL string to pass to `url.parse`. This will try to set `host`, `path`, `protocol`, `port`, `url`. Any of these values will be overwritten if the corresponding property is set on `config` | `http://localhost:8888` | `undefined`
 token | The Splunk HTTP Event Collector token | |
 
+_**WARNING**_ - If the Splunk transport fails to connect to Splunk, log messages will be lost during the outage. DO NOT rely on this logger alone if you need to have guaranteed delivery of all logs to Splunk. 
+
 ### Advanced HTTP Access Log Configuration
 Override defaults.
 

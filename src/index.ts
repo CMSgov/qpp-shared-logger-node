@@ -215,6 +215,10 @@ class SharedLogger {
                 transports: this.buildLogTransports(options),
                 format: winston.format.combine(...formats),
             });
+            this.logger.on('error', (error, transport) => {
+                const transportName = transport ? transport.name : 'transport'
+                console.error(`Error from logging transport: '${transportName}' while logging`, error)
+            })
         } else {
             this.logger = noneLogger;
         }
@@ -273,7 +277,9 @@ class SharedLogger {
     buildLogTransports(options: Options) {
         const transports = [];
         if (logToConsole(options)) {
-            transports.push(new winston.transports.Console());
+            transports.push(new winston.transports.Console({
+                handleExceptions: true
+            }));
         } else {
             if (options.rotationMaxsize !== 'none') {
                 transports.push(
@@ -306,7 +312,10 @@ class SharedLogger {
             if (!options.splunkSettings.index)
                 options.splunkSettings.index = 'qpp';
             transports.push(
-                new SplunkStreamEvent({ splunk: options.splunkSettings })
+                new SplunkStreamEvent({
+                    splunk: options.splunkSettings,
+                    handleExceptions: true
+                })
             );
         }
 
