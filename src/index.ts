@@ -216,8 +216,17 @@ class SharedLogger {
                 format: winston.format.combine(...formats),
             });
             this.logger.on('error', (error, transport) => {
-                const transportName = transport ? transport.name : 'transport'
-                console.error(`Error from logging transport: '${transportName}' while logging`, error)
+                if (transport) {
+                    console.error(`Error from logging transport '${transport.name}':`, error)
+                    // Errors from transports could result in the transport being removed, re-add if that's the case
+                    // Compare against the passed transport object instead of name in case multiple transports exist
+                    const transportIndex = this.logger.transports.findIndex(element => element == transport);
+                    if (transportIndex == -1) {
+                        this.logger.add(transport);
+                    }
+                } else {
+                    console.error("Error from logger:", error)
+                }
             })
         } else {
             this.logger = noneLogger;
@@ -309,11 +318,12 @@ class SharedLogger {
         }
 
         if (options.splunkSettings) {
-            if (!options.splunkSettings.index)
-                options.splunkSettings.index = 'qpp';
+            const defaultSplunkOptions = { maxRetries: 5, index: 'qpp' };
+            const splunkOptions = Object.assign(defaultSplunkOptions, options.splunkSettings)
+
             transports.push(
                 new SplunkStreamEvent({
-                    splunk: options.splunkSettings,
+                    splunk: splunkOptions,
                     handleExceptions: true
                 })
             );

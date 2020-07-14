@@ -5,6 +5,7 @@ const sinon = require('sinon');
 const fs = require('fs');
 const moment = require('moment');
 import { sharedLogger } from '../src';
+import * as winston from 'winston';
 const TEST_LOG_DIR = process.env.TEST_LOG_DIR || '/tmp';
 
 // A winston Transport that sends log messages to a spy, so
@@ -24,6 +25,20 @@ let SpyTransport = (options) => {
         },
     };
 };
+
+const fakeConsoleTransportName = 'fakeConsoleTransport';
+
+// Winston transport which will emit an error event when the log method is called
+class FakeConsoleTransport extends winston.transports.Console {
+    constructor() {
+        super();
+        this.name = fakeConsoleTransportName;
+    }
+
+    log() {
+        this.emit('error', new Error('expected test error'));
+    }
+}
 
 function rmFile(fname) {
     try {
@@ -320,6 +335,7 @@ describe('sharedLogger', function () {
             });
             afterEach(function () {
                 sharedLogger.logger.remove('SpyTransport');
+                sharedLogger.logger.remove(fakeConsoleTransportName);
                 sandbox.restore();
             });
             after(function () {
@@ -364,6 +380,22 @@ describe('sharedLogger', function () {
                     done();
                 }, 20); // give the fs a moment to write the file
             });
+
+            it('should keep transport if an error is emitted', function() {
+                const consoleTransport = new FakeConsoleTransport();
+                let gotUnpiped = false;
+                consoleTransport.on('unpipe', () => {
+                    gotUnpiped = true;
+                })
+                sharedLogger.logger.add(consoleTransport);
+
+                sharedLogger.logger.info('testing message');
+
+                // Winston will remove (unpipe) a transport stream after an error.
+                // If we detect 'unpipe' and the transport is still in the list, then we have successfully re-added
+                assert(gotUnpiped)
+                assert(sharedLogger.logger.transports.findIndex(element => element == consoleTransport) >= 0);
+            })
         });
 
         describe('when configured with log rotation', function () {

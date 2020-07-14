@@ -1,6 +1,6 @@
 {
   "name": "qpp-shared-logger-node",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Common QPP logger that is shared across the different teams",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
