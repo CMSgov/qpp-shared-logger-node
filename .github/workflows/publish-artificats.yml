@@ -1,0 +1,38 @@
+#
+# When a pre-release event occur, this action will build code
+# and publish it to npmjs
+#
+
+name: Publish - NPMJS
+
+on:
+  release:
+    types: [ prereleased ]
+
+jobs:
+
+  # Will publish the node package to NPM packages
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout Codebase
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Configure Node version and registry
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.14.2
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies
+        run: |
+          npm run prepare
+          npm install
+
+      - name: Publish to NPMJS
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

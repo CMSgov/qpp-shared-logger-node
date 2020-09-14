@@ -5,7 +5,8 @@ This logger is opinionated. Configure it with a minimal set of options, and get 
 
 ## Installation
 ```
-$ yarn add qpp-shared-logger-node
+$ npm install qpp-shared-logger-node --save
+
 ```
 
 ## Usage
@@ -144,24 +145,33 @@ accessLog.maxFiles | The maximum number of rotated logs to keep around. Logs rot
 Log messages are composed of a `message` (String) and `metadata` (key-value). Keys in the metadata that match one of the `redactKeys` will not have their value logged. _Note that the logger does not search the String message for data to scrub._ Please keep log messages simple, and add metadata with proper keys.
 
 ## Compatibility
-Tested with node 6.10.3 and node 8.9.0
+Tested with node v10.15.3 and node v12.15.0
 
 ## Development
 ```
-$ yarn          # install dependencies
-$ yarn test     # run tests, also report coverage in ./coverage/index.html
-$ yarn format   # run prettier to format code
-$ yarn lint     # run eslint to check code
+$ brew install gitleaks # Installs gitleaks for pre-commit secret detection. If not running on Mac, see https://github.com/zricethezav/gitleaks/releases 
+$ npm install       # install dependencies
+$ npm  test         # run tests, also report coverage in ./coverage/index.html
+$ npm run  format   # run prettier to format code
+$ npm run lint      # run eslint to check code
 ```
 
-## Contributing to this project
-If you are planning on contributing to this project, please open a pull request with the branch title either name of the JIRA ticket that describes the work or some name that unambiguous.  We have a few people that we can assign the pull request to that should cover most of the stakeholders that would be interested in this project's development.
 
-Name | Email | EUA Id | Company
---- | --- | --- | ---
-Scott Haselton | scott.haselton@cms.hhs.gov | H98G |  USDS 
-Jonathan Julian | jonathan@adhocteam.us | JS1I | Ad Hoc
-Steve Love | steve@adhoc.team | LQI3 | Ad Hoc
+## Want to Contribute?
+
+Want to file a bug or contribute some code? Read up on our guidelines for [contributing].
+
+[contributing]: /.github/CONTRIBUTING.md
+
+## Public Domain
+This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived
+through the CC0 1.0 Universal public domain dedication.		
+
+All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to
+comply with this waiver of copyright interest.		
+
+See the [formal LICENSE file](/LICENSE).
+
 
 ## Resources
 * https://jira.cms.gov/browse/QPPELIG-130

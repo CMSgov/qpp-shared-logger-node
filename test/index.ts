@@ -381,21 +381,25 @@ describe('sharedLogger', function () {
                 }, 20); // give the fs a moment to write the file
             });
 
-            it('should keep transport if an error is emitted', function() {
+            it('should keep transport if an error is emitted', function () {
                 const consoleTransport = new FakeConsoleTransport();
                 let gotUnpiped = false;
                 consoleTransport.on('unpipe', () => {
                     gotUnpiped = true;
-                })
+                });
                 sharedLogger.logger.add(consoleTransport);
 
                 sharedLogger.logger.info('testing message');
 
                 // Winston will remove (unpipe) a transport stream after an error.
                 // If we detect 'unpipe' and the transport is still in the list, then we have successfully re-added
-                assert(gotUnpiped)
-                assert(sharedLogger.logger.transports.findIndex(element => element == consoleTransport) >= 0);
-            })
+                assert(gotUnpiped);
+                assert(
+                    sharedLogger.logger.transports.findIndex(
+                        (element) => element == consoleTransport
+                    ) >= 0
+                );
+            });
         });
 
         describe('when configured with log rotation', function () {

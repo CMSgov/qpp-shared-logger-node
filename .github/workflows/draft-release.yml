@@ -1,0 +1,44 @@
+#
+# Will create a draft release page and keep updating it as we push new changes to release branch.
+# If the title of the PR has QPPxx-xxxx pattern, then it will convert that to a link.
+#
+# Usecase : A change is pushed to release branch, eventually  will get released.
+#  So, this workflow will create a draft release page and keep it up to date.
+#
+
+name: Prepare - Release Notes
+on:
+  push:
+    branches:
+      - release/**
+
+jobs:
+
+  # Generate new release notes
+  update_release_draft:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout Codebase
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Detect new tag version from package.json
+        id: package-version
+        uses: salsify/action-detect-and-tag-new-version@68bbe8670f415d304e02942186441939c4692aa6 # pin@v1.0.3
+
+      - name: Throw error if version is not modified
+        if: steps.package-version.outputs.previous-version != steps.package-version.outputs.current-version
+        run: |
+          echo Package version is not modified!
+          exit 0
+
+      - name: Draft release notes
+        uses: release-drafter/release-drafter@de081b0226069b074ca60ce8eaa3771d5c46f799 # pin@v5
+        with:
+          config-name: release-drafter.yml
+          version: v${{ steps.package-version.outputs.current-version }}
+          tag: v${{ steps.package-version.outputs.current-version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

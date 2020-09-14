@@ -25,6 +25,7 @@
     "eslint": "^4.10.0",
     "eslint-config-prettier": "^2.7.0",
     "eslint-plugin-prettier": "^2.3.1",
+    "husky": "^4.2.5",
     "mocha": "^7.0.1",
     "moment": "^2.19.1",
     "nyc": "^15.0.0",
@@ -41,12 +42,17 @@
   "scripts": {
     "format": "prettier --write '{src,test}/**/*.ts'",
     "lint": "eslint ./src ./test",
-    "test": "nyc node_modules/.bin/mocha './test/**/*.*(js|ts)'",
+    "test": "nyc --reporter=cobertura --reporter=html node_modules/.bin/mocha './test/**/*.*(js|ts)'",
     "tsc": "rimraf ./build && tsc",
     "ts-node": "ts-node",
     "prepublishOnly": "rimraf ./build && npm run tsc",
     "snyk-protect": "snyk protect",
-    "prepare": "yarn run snyk-protect"
+    "prepare": "npm run snyk-protect && npm run tsc"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "gitleaks --verbose --redact --pretty"
+    }
   },
   "keywords": [
     "QPP",
