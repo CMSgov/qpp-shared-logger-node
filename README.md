@@ -97,6 +97,7 @@ You may override the defaults:
 
 Key | Description | Allowed Values | Default
 --- | --- | --- | ---
+addlFormats | This key accepts an array of Winston compatible [logform formats](https://github.com/winstonjs/logform) that are then added to the logger. This allows you to provide formats for unique scenarios that are not covered by the default formats. | An array of logform formats. | []
 format | Format logs should be written in. Default is `json` format. More on winston fromats can be found [https://www.npmjs.com/package/winston#formats](here). | `json`, `simple`, `prettyPrint`, `logstash` | `json`
 environment | Override the "node environment" that your app is running in. Using the conventional values will automatically configure various log settings for you. Conventional values are `development`, `test`, and `production`. Deployed code should [run with `NODE_ENV=production`](https://github.com/i0natan/nodebestpractices/blob/master/sections/production/setnodeenv.md) | `process.env.NODE_ENV`
 logDirectory | A valid directory where the log file should be written, or "console" to write to stdout. Will `throw` if the directory does not exist or is not writable. | `console`, or an absolute dir | _built from environment_

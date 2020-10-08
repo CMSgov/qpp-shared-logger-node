@@ -115,9 +115,10 @@ describe('sharedLogger', function () {
             const spy = sandbox.spy(process.stdout, 'write');
             sharedLogger.configure(options);
             sharedLogger.logger.info('should be prettyPrint');
+
             assert.equal(
                 spy.getCall(0).lastArg,
-                "{ message: 'should be prettyPrint',\n  level: 'info',\n  label: 'test' }\n"
+                "{ message: 'should be prettyPrint', level: 'info', label: 'test' }\n"
             );
         });
 
@@ -557,6 +558,57 @@ describe('sharedLogger', function () {
                 );
             });
         });
+
+        describe('when configured with additional formats', function () {
+            let stdoutSpy;
+            let sandbox;
+            before(function () {
+                const maskTins = winston.format((info) => {
+                    if (info.piitest) {
+                        const tinRegex = RegExp('\\b(\\d-?){9}\\b', 'g');
+                        info.piitest = info.piitest.replace(
+                            tinRegex,
+                            '[REDACTED]'
+                        );
+                    }
+                    return info;
+                });
+
+                sharedLogger.configure({
+                    environment: 'development',
+                    projectSlug: 'tester',
+                    logDirectory: 'console',
+                    logLevel: 'warn',
+                    logTimestamps: false,
+                    format: 'simple',
+                    addlFormats: [maskTins()],
+                });
+                sandbox = sinon.sandbox.create();
+            });
+
+            beforeEach(function () {
+                stdoutSpy = sandbox.spy(process.stdout, 'write');
+            });
+
+            afterEach(function () {
+                sandbox.restore();
+            });
+
+            it('should redact configured PII & use additionaly supplied formatters', function () {
+                // Password is redacted by defaults, `piitest` is redacted through additional formatter
+                sharedLogger.logger.warn('MESSAGE', {
+                    password: 'ABCDEF',
+                    piitest: '000111000',
+                });
+
+                sandbox.assert.called(process.stdout.write);
+                sandbox.assert.calledWithMatch(
+                    process.stdout.write,
+                    'warn: MESSAGE {"password":"[REDACTED]","piitest":"[REDACTED]","label":"tester"}\n'
+                );
+            });
+        });
+
         describe('when disabled', function () {
             before(function () {
                 sharedLogger.configure({

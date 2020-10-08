@@ -1,7 +1,10 @@
+import { Format } from 'logform';
+
 export interface Options {
     environment?: string;
     projectSlug: string;
     format?: string;
+    addlFormats?: Format[];
     logLevel?: string;
     logColorize?: boolean;
     logDirectory?: string;

@@ -183,14 +183,19 @@ class SharedLogger {
         //
         if (logEnabled(options)) {
             const scrubber = new Scrubber(options.redactKeys || []);
-            const formats = [
+            let formats = [
                 scrubber.format(),
                 winston.format.label({ label: options.projectSlug }),
             ];
 
+            if (options.addlFormats) {
+                formats = formats.concat(options.addlFormats);
+            }
+
             if (options.logColorize === true) {
                 formats.push(winston.format.colorize());
             }
+
             if (options.logTimestamps === true) {
                 formats.push(localTimestampFormat());
             }
