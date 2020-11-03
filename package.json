@@ -4,7 +4,7 @@
   "description": "Common QPP logger that is shared across the different teams",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
-  "repository": "https://github.cms.gov/qpp/qpp-shared-logger-node.git",
+  "repository": "https://github.com/CMSgov/qpp-shared-logger-node.git",
   "author": "Branon Barrett <branon.barrett@semanticbits.com>",
   "license": "UNLICENSED",
   "dependencies": {
