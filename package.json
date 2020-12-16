@@ -7,6 +7,9 @@
   "repository": "https://github.cms.gov/qpp/qpp-shared-logger-node.git",
   "author": "Branon Barrett <branon.barrett@semanticbits.com>",
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=12.15"
+  },
   "dependencies": {
     "morgan": "^1.9.0",
     "rotating-file-stream": "^1.3.2",
