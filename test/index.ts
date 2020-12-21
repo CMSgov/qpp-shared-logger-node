@@ -118,7 +118,7 @@ describe('sharedLogger', function () {
 
             assert.equal(
                 spy.getCall(0).lastArg,
-                "{ message: \'should be prettyPrint\',\n  level: \'info\',\n  label: \'test\' }\n"
+                "{ message: 'should be prettyPrint',\n  level: 'info',\n  label: 'test' }\n"
             );
         });
 
