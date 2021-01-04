@@ -39,19 +39,8 @@ jobs:
       - name: Execute Unit Tests
         run: npm run test
 
-      # set the only_changed_files to true on PR based builds, otherwise show full coverage
-      - name: Produce Coverage report
-        uses: 5monkeys/cobertura-action@b3d1f4899a5f2d30adc2a13ac2abcd9f72e1fe66 # pin@master
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v2
         with:
+          name: coverage
           path: coverage/cobertura-coverage.xml
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          only_changed_files: ${{github.base_ref != null}}
-          show_line: true
-          show_branch: true
-          minimum_coverage: 90
-
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@c35654669e40ece974c8835211c2e8ad9c802df0 # pin@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
