@@ -1,0 +1,50 @@
+#
+# This workflow will run post build quality checks
+# and is invoked when the "Build - PR" workflow finishes.
+#
+name: Quality Checks
+
+on:
+  workflow_run:
+    workflows: ["Build - PR"]
+    types:
+      - completed
+
+jobs:
+  perform-quality-checks:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.event == 'pull_request' }}
+
+    steps:
+
+      - name: Checkout Codebase
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_commit.id }}
+
+      - name: Download Coverage Artifacts
+        uses: dawidd6/action-download-artifact@891cccee4b25d3306cf5edafa174ddc1d969871f
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: ${{ github.event.workflow_run.workflow_id }}
+          commit: ${{ github.event.workflow_run.head_commit.id }}
+          name: coverage
+          path: coverage
+
+      # set the only_changed_files to true on PR based builds, otherwise show full coverage
+      - name: Produce Coverage report
+        uses: bijujoseph/cobertura-action@master # temporary
+        with:
+          path: coverage/cobertura-coverage.xml
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          only_changed_files: ${{github.base_ref != null}}
+          show_line: true
+          show_branch: true
+          minimum_coverage: 90
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@c35654669e40ece974c8835211c2e8ad9c802df0 # pin@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
