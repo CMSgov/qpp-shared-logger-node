@@ -36,3 +36,29 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+  # create a backfill PR of release into master after a successful release
+  backfill:
+    runs-on: ubuntu-latest
+    needs: publish-npm
+    steps:
+
+      - name: Checkout Release Branch
+        if: ${{ github.event.release.draft == false && startsWith(github.event.release.target_commitish, 'release/')}}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.release.target_commitish }}
+
+      - name: Create Backfill Pull Request
+        if: ${{ github.event.release.draft == false && startsWith(github.event.release.target_commitish, 'release/')}}
+        id: pr
+        uses: peter-evans/create-pull-request@45c510e1f68ba052e3cd911f661a799cfb9ba3a3 #v3.6.0
+        with:
+          token: ${{ secrets.GH_USER_TOKEN }}
+          commit-message: Backfill ${{ github.event.release.repository.default_branch }} with release tag ${{ github.event.release.tag_name }}
+          title: Backfill master -  ${{github.event.release.tag_name}}
+          branch: feature/merge_release_${{github.event.release.tag_name}}
+          base: ${{ github.event.release.repository.default_branch}}
+          body: |
+            Auto generated pull request to backfill `${{ github.event.release.tag_name }} into ${{ github.event.release.repository.default_branch }}`.
+
