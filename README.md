@@ -157,6 +157,21 @@ $ npm run  format   # run prettier to format code
 $ npm run lint      # run eslint to check code
 ```
 
+## Release Process
+
+The release process is semi-automated via github actions. A number of steps are necessarily left manual (such as versioning) and require intervention from the user.
+
+1. Create a release branch `release/*` either off of `master` to pull all changes, or by cherry-picking only certain changes.
+
+2. Bump the `version` using `npm version <patch | minor | major>`. 
+  
+3. Push the release branch to github.
+
+4. Github actions will automatically [create a release](https://github.com/CMSgov/qpp-shared-logger-node/releases/) and tag based off the version in `package.json`. 
+
+5. Review the draft release page and publish it as a pre-release.
+
+5. Github actions will automatically publish a package to npm. Additionally, a new pull request will be created to backfill `master` from `release` if necessary.
 
 ## Want to Contribute?
 
