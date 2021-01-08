@@ -1,4 +1,4 @@
-# qpp-shared-logger-node ![Build](https://github.com/CMSgov/qpp-shared-logger-node/workflows/Build%20-%20PR/badge.svg) [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/dashboard?id=CMSgov_qpp-shared-logger-node) [![npm version](https://badge.fury.io/js/qpp-shared-logger-node.svg)](https://badge.fury.io/js/qpp-shared-logger-node) 
+# qpp-shared-logger-node ![Build](https://github.com/CMSgov/qpp-shared-logger-node/workflows/Build%20-%20PR/badge.svg) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=CMSgov_qpp-shared-logger-node&metric=alert_status)](https://sonarcloud.io/dashboard?id=CMSgov_qpp-shared-logger-node) [![npm version](https://badge.fury.io/js/qpp-shared-logger-node.svg)](https://badge.fury.io/js/qpp-shared-logger-node) 
 A simple configurable wrapper around the [winston](https://www.npmjs.com/package/winston) application logger and the [morgan](https://www.npmjs.com/package/morgan) http access logger.
 
 This logger is opinionated. Configure it with a minimal set of options, and get Splunk-searchable, PII-scrubbed, and QPP-compliant logs with minimal effort.
