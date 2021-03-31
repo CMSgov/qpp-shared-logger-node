@@ -10,10 +10,10 @@
   "dependencies": {
     "morgan": "^1.9.0",
     "rotating-file-stream": "^1.3.2",
+    "snyk": "^1.324.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.4.2",
-    "winston-splunk-httplogger": "^2.3.1",
-    "snyk": "^1.324.0"
+    "winston-splunk-httplogger": "^2.3.1"
   },
   "devDependencies": {
     "@types/chai": "^4.2.7",
