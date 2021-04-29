@@ -29,8 +29,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm run prepare
           npm install
+          npm run prepare
 
       - name: Publish to NPMJS
         run: npm publish
