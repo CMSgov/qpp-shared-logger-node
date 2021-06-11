@@ -34,7 +34,7 @@ jobs:
 
       # set the only_changed_files to true on PR based builds, otherwise show full coverage
       - name: Produce Coverage report
-        uses: bijujoseph/cobertura-action@master # temporary
+        uses: 5monkeys/cobertura-action@67ec5c1b5ee78e49d22300126df88761ca6a7031 # pin @v7
         with:
           path: coverage/cobertura-coverage.xml
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -43,8 +43,3 @@ jobs:
           show_branch: true
           minimum_coverage: 90
 
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@c35654669e40ece974c8835211c2e8ad9c802df0 # pin@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
