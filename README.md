@@ -157,6 +157,17 @@ $ npm run  format   # run prettier to format code
 $ npm run lint      # run eslint to check code
 ```
 
+## Publishing
+
+The [qpp-shared-logger-node npm package](https://www.npmjs.com/package/qpp-shared-logger-node) can be published to npmjs.com via GitHub workflow. Make sure that an `NPM_TOKEN` is configured in the repository's Secrets setttings. The token must belong to a member of the npm package's maintainers team. To publish, make sure the version number in package.json is updated, then create a Release in GitHub with the "pre-release" checkbox checked. Publishing should happen automatically after that.
+
+If the GitHub Workflow is not working, a member of the npm package's maintainers team can publish via command line on a local computer.
+
+    npm login
+    git checkout master
+    git pull
+    npm publish
+
 
 ## Want to Contribute?
 
