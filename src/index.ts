@@ -7,6 +7,7 @@ import fs = require('fs');
 import filenames = require('./filenames');
 import { Scrubber } from './scrubber';
 import { Options } from './options';
+import { Request } from './request';
 
 function defaultLogDirByEnvironment(options: Options) {
     switch (options.environment) {
@@ -247,7 +248,7 @@ class SharedLogger {
         //
         options.accessLog = options.accessLog || {};
         if (accessLogEnabled(options)) {
-            morgan.token('url', (req) => {
+            morgan.token('url', (req: Request) => {
                 const url = req['pathname'] ?? req.baseUrl;
                 if (!req.query || Object.keys(req.query).length === 0) {
                     return url;
