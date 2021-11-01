@@ -33,7 +33,7 @@
     "sinon": "^4.0.2",
     "snyk": "^1.608.0",
     "ts-node": "^6.0.2",
-    "ts-node-dev": "^1.1.6",
+    "ts-node-dev": "^1.1.8",
     "tsconfig-paths": "^3.3.2",
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.9.2",
