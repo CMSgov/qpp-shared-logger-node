@@ -4,7 +4,7 @@ const assert = require('chai').assert;
 const sinon = require('sinon');
 const fs = require('fs');
 const moment = require('moment');
-import { sharedLogger } from '../src';
+import { Options, sharedLogger } from '../src';
 import * as winston from 'winston';
 const TEST_LOG_DIR = process.env.TEST_LOG_DIR || '/tmp';
 
@@ -135,6 +135,22 @@ describe('sharedLogger', function () {
             assert.equal(
                 spy.getCall(0).lastArg,
                 '{"@message":"should be logstash","@fields":{"level":"info","label":"test"}}\n'
+            );
+        });
+
+        it('should setup redaction regexes', () => {
+            const options: Options = {
+                projectSlug: 'test',
+                logDirectory: 'console',
+                logTimestamps: false,
+                redactRegexes: [/b[a-z]/]
+            };
+            const spy = sandbox.spy(process.stdout, 'write');
+            sharedLogger.configure(options);
+            sharedLogger.logger.info('should be redacted');
+            assert.equal(
+                spy.getCall(0).lastArg,
+                '{"message":"should [REDACTED] redacted","level":"info","label":"test"}\n'
             );
         });
     });
