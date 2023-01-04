@@ -6,6 +6,7 @@
   "author": "Jonathan Julian <jonathan@adhocteam.us>",
   "license": "MIT",
   "dependencies": {
-    "qpp-shared-logger-node": "file:.."
+    "qpp-shared-logger-node": "file:..",
+    "json-schema":"^0.4.0"
   }
 }

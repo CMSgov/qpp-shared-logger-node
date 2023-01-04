@@ -37,8 +37,7 @@
     "tsconfig-paths": "^3.3.2",
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.9.2",
-    "typescript": "^3.2.1",
-    "json-schema": "^0.4.0"
+    "typescript": "^3.2.1"
   },
   "scripts": {
     "format": "prettier --write '{src,test}/**/*.ts'",
