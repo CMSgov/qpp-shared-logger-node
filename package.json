@@ -1,6 +1,6 @@
 {
   "name": "qpp-shared-logger-node",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Common QPP logger that is shared across the different teams",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
@@ -12,7 +12,7 @@
     "rotating-file-stream": "^1.3.2",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.5",
-    "winston-splunk-httplogger": "^2.4.1"
+    "winston-splunk-httplogger": "^3.1.6"
   },
   "devDependencies": {
     "@types/chai": "^4.2.7",
