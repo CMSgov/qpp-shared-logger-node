@@ -16,6 +16,7 @@
     "winston-splunk-httplogger": "^3.1.8"
   },
   "devDependencies": {
+    "@snyk/protect": "^1.1190.0",
     "@types/chai": "^4.2.7",
     "@types/mocha": "^5.2.7",
     "@types/morgan": "^1.7.37",
@@ -46,7 +47,7 @@
     "tsc": "rimraf ./build && tsc",
     "ts-node": "ts-node",
     "prepublishOnly": "rimraf ./build && npm run tsc",
-    "snyk-protect": "snyk protect",
+    "snyk-protect": "snyk-protect",
     "prepare": "npm run snyk-protect && npm run tsc"
   },
   "husky": {
