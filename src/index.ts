@@ -54,8 +54,7 @@ function localTimestamp() {
 }
 
 const localTimestampFormat = winston.format((info) => {
-    info.timestamp = localTimestamp();
-    return info;
+    return { ...info, timestamp: localTimestamp() };
 });
 
 function buildAccessLogStream(options: Options) {
@@ -182,7 +181,10 @@ class SharedLogger {
         // winston: application logger
         //
         if (logEnabled(options)) {
-            const scrubber = new Scrubber(options.redactKeys || [], options.redactRegexes || []);
+            const scrubber = new Scrubber(
+                options.redactKeys || [],
+                options.redactRegexes || []
+            );
             let formats = [
                 scrubber.format(),
                 winston.format.label({ label: options.projectSlug }),
@@ -253,7 +255,10 @@ class SharedLogger {
                     return url;
                 }
                 // redact the query parameters
-                const scrubber = new Scrubber(options.redactKeys || [], options.redactRegexes || []);
+                const scrubber = new Scrubber(
+                    options.redactKeys || [],
+                    options.redactRegexes || []
+                );
                 const scrubbedQuery = scrubber.scrub(req.query);
                 const scrubbedQueryParameters = Object.entries(
                     scrubbedQuery || {}
