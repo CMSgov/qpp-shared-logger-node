@@ -101,7 +101,7 @@ describe('sharedLogger', function () {
             sharedLogger.logger.info('should be json');
             assert.equal(
                 spy.getCall(0).lastArg,
-                '{"label":"test","level":"info","message":"should be json"}\n',
+                '{"message":"should be json","level":"info","label":"test"}\n',
             );
         });
 
@@ -134,7 +134,7 @@ describe('sharedLogger', function () {
             sharedLogger.logger.info('should be logstash');
             assert.equal(
                 spy.getCall(0).lastArg,
-                '{"@fields":{"label":"test","level":"info"},"@message":"should be logstash"}\n',
+                '{"@message":"should be logstash","@fields":{"level":"info","label":"test"}}\n',
             );
         });
 
@@ -150,7 +150,7 @@ describe('sharedLogger', function () {
             sharedLogger.logger.info('should be redacted');
             assert.equal(
                 spy.getCall(0).lastArg,
-                '{"label":"test","level":"info","message":"should [REDACTED] redacted"}\n',
+                '{"message":"should [REDACTED] redacted","level":"info","label":"test"}\n',
             );
         });
     });
@@ -547,7 +547,7 @@ describe('sharedLogger', function () {
                 );
                 assert.equal(
                     stdoutSpy.getCall(1).args[0],
-                    'warn: MESSAGE 2 {"a":1000,"label":"tester","x":1,"y":5}\n',
+                    'warn: MESSAGE 2 {"x":1,"y":5,"a":1000,"label":"tester"}\n',
                 );
                 assert.equal(
                     stdoutSpy.getCall(2).args[0],
@@ -570,7 +570,7 @@ describe('sharedLogger', function () {
                 sandbox.assert.called(process.stdout.write);
                 sandbox.assert.calledWithMatch(
                     process.stdout.write,
-                    'warn: MESSAGE {"label":"tester","password":"[REDACTED]"}\n',
+                    'warn: MESSAGE {"password":"[REDACTED]","label":"tester"}\n',
                 );
             });
         });
