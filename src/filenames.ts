@@ -23,7 +23,7 @@ export function accessLogFilenameGenerator(options: Options) {
             return (num > 9 ? '' : '0') + num;
         }
         const dateStr = `${time.getFullYear()}${pad(time.getMonth() + 1)}${pad(
-            time.getDate()
+            time.getDate(),
         )}`;
         const indexStr = index ? `.${index}` : '';
         return `${prefix}.${dateStr}.log${indexStr}`;

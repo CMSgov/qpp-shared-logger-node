@@ -8,6 +8,7 @@
   "author": "Branon Barrett <branon.barrett@semanticbits.com>",
   "license": "CC0-1.0",
   "dependencies": {
+    "@typescript-eslint/parser": "^6.0.0",
     "morgan": "^1.10.0",
     "rotating-file-stream": "^3.1.0",
     "winston": "^3.3.3",
@@ -40,7 +41,7 @@
   },
   "scripts": {
     "format": "prettier --write '{src,test}/**/*.ts'",
-    "lint": "eslint ./src ./test",
+    "lint": "eslint src/* test/*",
     "test": "nyc --reporter=cobertura --reporter=html node_modules/.bin/mocha './test/**/*.*(js|ts)'",
     "tsc": "rimraf ./build && tsc",
     "ts-node": "ts-node",

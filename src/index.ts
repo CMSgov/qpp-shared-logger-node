@@ -77,14 +77,14 @@ function buildAccessLogStream(options: Options) {
 
             return rfs.createStream(
                 filenames.accessLogFilenameGenerator(options),
-                streamOptions
+                streamOptions,
             );
         } else {
             return fs.createWriteStream(
                 `${accessLogDirectory(options)}/${filenames.accessLogFilename(
-                    options
+                    options,
                 )}.log`,
-                { flags: 'a' }
+                { flags: 'a' },
             );
         }
     }
@@ -158,7 +158,7 @@ class SharedLogger {
         if (this.configured) {
             // eslint-disable-next-line no-console
             console.error(
-                'sharedLogger.configure(): called more than once, ignoring'
+                'sharedLogger.configure(): called more than once, ignoring',
             );
             return;
         }
@@ -183,7 +183,7 @@ class SharedLogger {
         if (logEnabled(options)) {
             const scrubber = new Scrubber(
                 options.redactKeys || [],
-                options.redactRegexes || []
+                options.redactRegexes || [],
             );
             let formats = [
                 scrubber.format(),
@@ -226,12 +226,12 @@ class SharedLogger {
                 if (transport) {
                     console.error(
                         `Error from logging transport '${transport.name}':`,
-                        error
+                        error,
                     );
                     // Errors from transports could result in the transport being removed, re-add if that's the case
                     // Compare against the passed transport object instead of name in case multiple transports exist
                     const transportIndex = this.logger.transports.findIndex(
-                        (element) => element == transport
+                        (element) => element == transport,
                     );
                     if (transportIndex == -1) {
                         this.logger.add(transport);
@@ -257,11 +257,11 @@ class SharedLogger {
                 // redact the query parameters
                 const scrubber = new Scrubber(
                     options.redactKeys || [],
-                    options.redactRegexes || []
+                    options.redactRegexes || [],
                 );
                 const scrubbedQuery = scrubber.scrub(req.query);
                 const scrubbedQueryParameters = Object.entries(
-                    scrubbedQuery || {}
+                    scrubbedQuery || {},
                 )
                     .map((query) => `${query[0]}=${query[1]}`)
                     .join('&');
@@ -304,14 +304,14 @@ class SharedLogger {
             transports.push(
                 new winston.transports.Console({
                     handleExceptions: true,
-                })
+                }),
             );
         } else {
             if (options.rotationMaxsize !== 'none') {
                 transports.push(
                     new DailyRotateFile({
                         filename: `${logDirectory(
-                            options
+                            options,
                         )}/${filenames.logFilename(options)}.%DATE%.${
                             options.logFileExtension || 'log'
                         }`,
@@ -321,15 +321,15 @@ class SharedLogger {
                         maxFiles: `${
                             options.maxDays || defaultRotationMaxDays
                         }d`,
-                    })
+                    }),
                 );
             } else {
                 transports.push(
                     new winston.transports.File({
                         filename: `${logDirectory(
-                            options
+                            options,
                         )}/${filenames.logFilename(options)}.log`,
-                    })
+                    }),
                 );
             }
         }
@@ -338,14 +338,14 @@ class SharedLogger {
             const defaultSplunkOptions = { maxRetries: 5, index: 'qpp' };
             const splunkOptions = Object.assign(
                 defaultSplunkOptions,
-                options.splunkSettings
+                options.splunkSettings,
             );
 
             transports.push(
                 new SplunkStreamEvent({
                     splunk: splunkOptions,
                     handleExceptions: true,
-                })
+                }),
             );
         }
 
