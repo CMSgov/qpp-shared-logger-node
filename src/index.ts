@@ -2,7 +2,7 @@ import * as winston from 'winston';
 import DailyRotateFile = require('winston-daily-rotate-file');
 import SplunkStreamEvent = require('winston-splunk-httplogger');
 import morgan = require('morgan'); // access log
-import RotatingFileStream from 'rotating-file-stream'; // for morgan
+import * as rfs from 'rotating-file-stream'; // for morgan
 import fs = require('fs');
 import filenames = require('./filenames');
 import { Scrubber } from './scrubber';
@@ -76,7 +76,7 @@ function buildAccessLogStream(options: Options) {
                 streamOptions.maxFiles = options.accessLog.maxFiles;
             }
 
-            return RotatingFileStream(
+            return rfs.createStream(
                 filenames.accessLogFilenameGenerator(options),
                 streamOptions
             );
