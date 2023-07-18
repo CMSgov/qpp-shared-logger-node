@@ -8,7 +8,6 @@
   "author": "Branon Barrett <branon.barrett@semanticbits.com>",
   "license": "CC0-1.0",
   "dependencies": {
-    "@typescript-eslint/parser": "^6.0.0",
     "morgan": "^1.10.0",
     "rotating-file-stream": "^3.1.0",
     "winston": "^3.3.3",
@@ -21,6 +20,7 @@
     "@types/mocha": "^5.2.7",
     "@types/morgan": "^1.7.37",
     "@types/node": "^13.5.0",
+    "@typescript-eslint/parser": "^6.1.0",
     "chai": "^4.1.2",
     "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
@@ -36,8 +36,6 @@
     "ts-node": "^6.0.2",
     "ts-node-dev": "^1.1.8",
     "tsconfig-paths": "^3.3.2",
-    "tslint": "^5.11.0",
-    "tslint-config-airbnb": "^5.9.2",
     "typescript": "^3.2.1"
   },
   "scripts": {
