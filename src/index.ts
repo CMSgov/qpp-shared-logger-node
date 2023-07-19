@@ -250,8 +250,8 @@ class SharedLogger {
         options.accessLog = options.accessLog || {};
         if (accessLogEnabled(options)) {
             morgan.token('url', (req) => {
-                const url = req['pathname'] ?? req.baseUrl;
-                if (!req.query || Object.keys(req.query).length === 0) {
+                const url = req['pathname'] ?? req['baseUrl'];
+                if (!req['query'] || Object.keys(req['query']).length === 0) {
                     return url;
                 }
                 // redact the query parameters
@@ -259,7 +259,7 @@ class SharedLogger {
                     options.redactKeys || [],
                     options.redactRegexes || [],
                 );
-                const scrubbedQuery = scrubber.scrub(req.query);
+                const scrubbedQuery = scrubber.scrub(req['query']);
                 const scrubbedQueryParameters = Object.entries(
                     scrubbedQuery || {},
                 )
