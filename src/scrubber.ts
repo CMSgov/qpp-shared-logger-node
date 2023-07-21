@@ -28,7 +28,10 @@ export class Scrubber {
     // See https://github.com/winstonjs/winston/blob/HEAD/UPGRADE-3.0.md#rewriters for upgrade info
     format = winston.format((info) => this.scrub(info));
 
-    constructor(redactKeys: string[], regexesBlacklist?: Array<string | RegExp>) {
+    constructor(
+        redactKeys: string[],
+        regexesBlacklist?: Array<string | RegExp>,
+    ) {
         // merge with defaults
         this.blacklist = [
             ...new Set([
@@ -48,8 +51,11 @@ export class Scrubber {
             if (_.isString(value) && this.regexesBlacklist) {
                 this.regexesBlacklist.forEach((redaction) => {
                     const regex = new RegExp(redaction);
-                    value = value.replace(new RegExp(regex.source, regex.flags + 'g'), '[REDACTED]');
-                })
+                    value = value.replace(
+                        new RegExp(regex.source, regex.flags + 'g'),
+                        '[REDACTED]',
+                    );
+                });
                 return value;
             }
         });

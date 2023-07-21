@@ -1,5 +1,3 @@
-'use strict';
-
 const assert = require('chai').assert;
 const sinon = require('sinon');
 const fs = require('fs');
@@ -10,21 +8,26 @@ const TEST_LOG_DIR = process.env.TEST_LOG_DIR || '/tmp';
 
 // A winston Transport that sends log messages to a spy, so
 // logging can be verified
-let SpyTransport = (options) => {
-    options = options || {};
-    this.level = options.level || 'silly';
-    this.spy = options.spy;
+class SpyTransport {
+    level: string;
+    spy: any;
+    constructor(options = { level: 'silly', spy: sinon.spy() }) {
+        this.level = options.level;
+        this.spy = options.spy;
+    }
 
-    return {
-        name: 'SpyTransport',
-        on: () => {},
-        removeListener: () => {},
-        log: (level, msg, meta, callback) => {
-            this.spy(level, msg, meta);
-            callback(null, true);
-        },
-    };
-};
+    getTransport() {
+        return {
+            name: 'SpyTransport',
+            on: () => {},
+            removeListener: () => {},
+            log: (level, msg, meta, callback) => {
+                this.spy(level, msg, meta);
+                callback(null, true);
+            },
+        };
+    }
+}
 
 const fakeConsoleTransportName = 'fakeConsoleTransport';
 
@@ -72,14 +75,14 @@ describe('sharedLogger', function () {
         sharedLogger.configured = false;
     });
     describe('when configured with missing values', function () {
-        const sandbox = sinon.sandbox.create();
+        const sandbox = sinon.createSandbox();
         afterEach(() => sandbox.restore());
 
         it('should throw an error', function () {
             assert.throws(
                 () => sharedLogger.configure(null),
                 Error,
-                /are required/
+                /are required/,
             );
         });
         it('should throw error if no projectSlug', () => {
@@ -101,7 +104,7 @@ describe('sharedLogger', function () {
             sharedLogger.logger.info('should be json');
             assert.equal(
                 spy.getCall(0).lastArg,
-                '{"message":"should be json","level":"info","label":"test"}\n'
+                '{"label":"test","level":"info","message":"should be json"}\n',
             );
         });
 
@@ -118,7 +121,7 @@ describe('sharedLogger', function () {
 
             assert.equal(
                 spy.getCall(0).lastArg,
-                "{ message: 'should be prettyPrint', level: 'info', label: 'test' }\n"
+                "{ message: 'should be prettyPrint', level: 'info', label: 'test' }\n",
             );
         });
 
@@ -134,7 +137,7 @@ describe('sharedLogger', function () {
             sharedLogger.logger.info('should be logstash');
             assert.equal(
                 spy.getCall(0).lastArg,
-                '{"@message":"should be logstash","@fields":{"level":"info","label":"test"}}\n'
+                '{"@fields":{"label":"test","level":"info"},"@message":"should be logstash"}\n',
             );
         });
 
@@ -143,14 +146,14 @@ describe('sharedLogger', function () {
                 projectSlug: 'test',
                 logDirectory: 'console',
                 logTimestamps: false,
-                redactRegexes: [/b[a-z]/]
+                redactRegexes: [/b[a-z]/],
             };
             const spy = sandbox.spy(process.stdout, 'write');
             sharedLogger.configure(options);
             sharedLogger.logger.info('should be redacted');
             assert.equal(
                 spy.getCall(0).lastArg,
-                '{"message":"should [REDACTED] redacted","level":"info","label":"test"}\n'
+                '{"label":"test","level":"info","message":"should [REDACTED] redacted"}\n',
             );
         });
     });
@@ -184,7 +187,7 @@ describe('sharedLogger', function () {
                 setTimeout(() => {
                     let data = fs.readFileSync(
                         `${TEST_LOG_DIR}/access.log`,
-                        'utf8'
+                        'utf8',
                     );
                     let logLines = data.split('\n');
                     assert.isAtMost(logLines.length, 2);
@@ -205,13 +208,13 @@ describe('sharedLogger', function () {
                         baseUrl: '/index.html',
                     },
                     res,
-                    next
+                    next,
                 );
 
                 setTimeout(() => {
                     let data = fs.readFileSync(
                         `${TEST_LOG_DIR}/access.log`,
-                        'utf8'
+                        'utf8',
                     );
                     let logLines = data.split('\n');
                     assert.isAtMost(logLines.length, 2);
@@ -232,19 +235,19 @@ describe('sharedLogger', function () {
                         query: { tin: '123' },
                     },
                     res,
-                    next
+                    next,
                 );
 
                 setTimeout(() => {
                     let data = fs.readFileSync(
                         `${TEST_LOG_DIR}/access.log`,
-                        'utf8'
+                        'utf8',
                     );
                     let logLines = data.split('\n');
                     assert.isAtMost(logLines.length, 2);
                     assert.match(
                         logLines[0],
-                        /GET \/index.html\?tin=\[REDACTED\]/
+                        /GET \/index.html\?tin=\[REDACTED\]/,
                     );
                     done();
                 }, 5); // give the fs a moment to write the file
@@ -278,7 +281,7 @@ describe('sharedLogger', function () {
                 setTimeout(() => {
                     let data = fs.readFileSync(
                         `${TEST_LOG_DIR}/access.log`,
-                        'utf8'
+                        'utf8',
                     );
                     let logLines = data.split('\n');
                     assert.isAtMost(logLines.length, 2);
@@ -302,7 +305,7 @@ describe('sharedLogger', function () {
             });
 
             it('should silently suppress log messages', function () {
-                const sandbox = sinon.sandbox.create();
+                const sandbox = sinon.createSandbox();
                 sandbox.spy(process.stdout, 'write');
                 sandbox.spy(process.stderr, 'write');
 
@@ -336,19 +339,18 @@ describe('sharedLogger', function () {
             };
 
             before(function () {
-                sandbox = sinon.sandbox.create();
+                sandbox = sinon.createSandbox();
 
                 sharedLogger.configure(loggerOptions);
             });
 
             beforeEach(function () {
                 spy = sandbox.spy();
-                sharedLogger.logger.add(
-                    SpyTransport({
-                        spy: spy,
-                        level: 'debug',
-                    })
-                );
+                const transport = new SpyTransport({
+                    spy: spy,
+                    level: 'debug',
+                });
+                sharedLogger.logger.add(transport.getTransport());
             });
             afterEach(function () {
                 sharedLogger.logger.remove('SpyTransport');
@@ -389,7 +391,7 @@ describe('sharedLogger', function () {
                 setTimeout(() => {
                     let data = fs.readFileSync(
                         `${TEST_LOG_DIR}/ktke.log`,
-                        'utf8'
+                        'utf8',
                     );
                     let logLines = data.split('\n');
                     assert.isAtMost(logLines.length, 3);
@@ -413,8 +415,8 @@ describe('sharedLogger', function () {
                 assert(gotUnpiped);
                 assert(
                     sharedLogger.logger.transports.findIndex(
-                        (element) => element == consoleTransport
-                    ) >= 0
+                        (element) => element == consoleTransport,
+                    ) >= 0,
                 );
             });
         });
@@ -496,7 +498,7 @@ describe('sharedLogger', function () {
                     logTimestamps: false,
                     format: 'simple',
                 });
-                sandbox = sinon.sandbox.create();
+                sandbox = sinon.createSandbox();
             });
             beforeEach(function () {
                 stdoutSpy = sandbox.spy(process.stdout, 'write');
@@ -511,7 +513,7 @@ describe('sharedLogger', function () {
 
                 assert.equal(
                     stdoutSpy.getCall(0).args[0],
-                    'warn: WARN {"label":"tester"}\n'
+                    'warn: WARN {"label":"tester"}\n',
                 );
                 assert.isNull(stdoutSpy.getCall(1));
             });
@@ -521,7 +523,7 @@ describe('sharedLogger', function () {
 
                 sandbox.assert.calledWithMatch(
                     stdoutSpy,
-                    'warn: MESSAGE {"label":"tester"}\n'
+                    'warn: MESSAGE {"label":"tester"}\n',
                 );
             });
 
@@ -543,23 +545,23 @@ describe('sharedLogger', function () {
                 sandbox.assert.callCount(process.stdout.write, 5);
                 assert.equal(
                     stdoutSpy.getCall(0).args[0],
-                    'warn: MESSAGE 1 {"label":"tester"}\n'
+                    'warn: MESSAGE 1 {"label":"tester"}\n',
                 );
                 assert.equal(
                     stdoutSpy.getCall(1).args[0],
-                    'warn: MESSAGE 2 {"x":1,"y":5,"a":1000,"label":"tester"}\n'
+                    'warn: MESSAGE 2 {"a":1000,"label":"tester","x":1,"y":5}\n',
                 );
                 assert.equal(
                     stdoutSpy.getCall(2).args[0],
-                    'error: MESSAGE 3 {"x":2,"z":8,"label":"tester"}\n'
+                    'error: MESSAGE 3 {"label":"tester","x":2,"z":8}\n',
                 );
                 assert.equal(
                     stdoutSpy.getCall(3).args[0],
-                    'error: MESSAGE 5 {"z":9,"label":"tester"}\n'
+                    'error: MESSAGE 5 {"label":"tester","z":9}\n',
                 );
                 assert.equal(
                     stdoutSpy.getCall(4).args[0],
-                    'warn: MESSAGE 6 {"x":3,"z":8,"label":"tester"}\n'
+                    'warn: MESSAGE 6 {"label":"tester","x":3,"z":8}\n',
                 );
             });
 
@@ -570,7 +572,7 @@ describe('sharedLogger', function () {
                 sandbox.assert.called(process.stdout.write);
                 sandbox.assert.calledWithMatch(
                     process.stdout.write,
-                    'warn: MESSAGE {"password":"[REDACTED]","label":"tester"}\n'
+                    'warn: MESSAGE {"label":"tester","password":"[REDACTED]"}\n',
                 );
             });
         });
@@ -584,7 +586,7 @@ describe('sharedLogger', function () {
                         const tinRegex = RegExp('\\b(\\d-?){9}\\b', 'g');
                         info.piitest = info.piitest.replace(
                             tinRegex,
-                            '[REDACTED]'
+                            '[REDACTED]',
                         );
                     }
                     return info;
@@ -599,7 +601,7 @@ describe('sharedLogger', function () {
                     format: 'simple',
                     addlFormats: [maskTins()],
                 });
-                sandbox = sinon.sandbox.create();
+                sandbox = sinon.createSandbox();
             });
 
             beforeEach(function () {
@@ -620,7 +622,7 @@ describe('sharedLogger', function () {
                 sandbox.assert.called(process.stdout.write);
                 sandbox.assert.calledWithMatch(
                     process.stdout.write,
-                    'warn: MESSAGE {"password":"[REDACTED]","piitest":"[REDACTED]","label":"tester"}\n'
+                    'warn: MESSAGE {"label":"tester","password":"[REDACTED]","piitest":"[REDACTED]"}\n',
                 );
             });
         });
@@ -639,7 +641,7 @@ describe('sharedLogger', function () {
             });
 
             it('should silently suppress logger calls', function () {
-                const sandbox = sinon.sandbox.create();
+                const sandbox = sinon.createSandbox();
                 sandbox.spy(process.stdout, 'write');
                 sandbox.spy(process.stderr, 'write');
 
@@ -652,7 +654,7 @@ describe('sharedLogger', function () {
                         sharedLogger.logger[logLevel]('This is a test');
                         sandbox.assert.notCalled(process.stdout.write);
                         sandbox.assert.notCalled(process.stderr.write);
-                    }
+                    },
                 );
 
                 sandbox.restore();
