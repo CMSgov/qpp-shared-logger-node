@@ -54,7 +54,8 @@ function localTimestamp() {
 }
 
 const localTimestampFormat = winston.format((info) => {
-    return { ...info, timestamp: localTimestamp() };
+    info.timestamp = localTimestamp();
+    return info;
 });
 
 function buildAccessLogStream(options: Options) {
