@@ -1,4 +1,4 @@
-# qpp-shared-logger-node ![Build](https://github.com/CMSgov/qpp-shared-logger-node/workflows/Build%20-%20PR/badge.svg) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=CMSgov_qpp-shared-logger-node&metric=alert_status)](https://sonarcloud.io/dashboard?id=CMSgov_qpp-shared-logger-node) [![npm version](https://badge.fury.io/js/qpp-shared-logger-node.svg)](https://badge.fury.io/js/qpp-shared-logger-node) 
+# qpp-shared-logger-node ![Build](https://github.com/CMSgov/qpp-shared-logger-node/workflows/Build%20-%20PR/badge.svg) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=CMSgov_qpp-shared-logger-node&metric=alert_status)](https://sonarcloud.io/dashboard?id=CMSgov_qpp-shared-logger-node) [![npm version](https://badge.fury.io/js/qpp-shared-logger-node.svg)](https://badge.fury.io/js/qpp-shared-logger-node)
 A simple configurable wrapper around the [winston](https://www.npmjs.com/package/winston) application logger and the [morgan](https://www.npmjs.com/package/morgan) http access logger.
 
 This logger is opinionated. Configure it with a minimal set of options, and get Splunk-searchable, PII-scrubbed, and QPP-compliant logs with minimal effort.
@@ -120,7 +120,7 @@ Key | Description | Allowed Values | Default
 url | URL string to pass to `url.parse`. This will try to set `host`, `path`, `protocol`, `port`, `url`. Any of these values will be overwritten if the corresponding property is set on `config` | `http://localhost:8888` | `undefined`
 token | The Splunk HTTP Event Collector token | |
 
-_**WARNING**_ - If the Splunk transport fails to connect to Splunk, log messages will be lost during the outage. DO NOT rely on this logger alone if you need to have guaranteed delivery of all logs to Splunk. 
+_**WARNING**_ - If the Splunk transport fails to connect to Splunk, log messages will be lost during the outage. DO NOT rely on this logger alone if you need to have guaranteed delivery of all logs to Splunk.
 
 ### Advanced HTTP Access Log Configuration
 Override defaults.
@@ -151,24 +151,28 @@ Tested with node v10.15.3 and node v12.15.0
 
 ## Development
 ```
-$ brew install gitleaks # Installs gitleaks for pre-commit secret detection. If not running on Mac, see https://github.com/zricethezav/gitleaks/releases 
+$ brew install gitleaks # Installs gitleaks for pre-commit secret detection. If not running on Mac, see https://github.com/zricethezav/gitleaks/releases
 $ npm install       # install dependencies
 $ npm  test         # run tests, also report coverage in ./coverage/index.html
 $ npm run  format   # run prettier to format code
 $ npm run lint      # run eslint to check code
 ```
 
-## Publishing
+## Release Process
 
-The [qpp-shared-logger-node npm package](https://www.npmjs.com/package/qpp-shared-logger-node) can be published to npmjs.com via GitHub workflow. Make sure that an `NPM_TOKEN` is configured in the repository's Secrets setttings. The token must belong to a member of the npm package's maintainers team. To publish, make sure the version number in package.json is updated, then create a Release in GitHub with the "pre-release" checkbox checked. Publishing should happen automatically after that.
+The release process is semi-automated via github actions. A number of steps are necessarily left manual (such as versioning) and require intervention from the user.
 
-If the GitHub Workflow is not working, a member of the npm package's maintainers team can publish via command line on a local computer.
+1. Create a release branch `release/*` either off of `master` to pull all changes, or by cherry-picking only certain changes.
 
-    npm login
-    git checkout master
-    git pull
-    npm publish
+2. Bump the `version` using `npm version <patch | minor | major>`.
 
+3. Push the release branch to github.
+
+4. Github actions will automatically [create a release](https://github.com/CMSgov/qpp-shared-logger-node/releases/) and tag based off the version in `package.json`.
+
+5. Review the draft release page and publish it as a pre-release.
+
+5. Github actions will automatically publish a package to npm. Additionally, a new pull request will be created to backfill `master` from `release` if necessary.
 
 ## Want to Contribute?
 
@@ -178,10 +182,10 @@ Want to file a bug or contribute some code? Read up on our guidelines for [contr
 
 ## Public Domain
 This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived
-through the CC0 1.0 Universal public domain dedication.		
+through the CC0 1.0 Universal public domain dedication.
 
 All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to
-comply with this waiver of copyright interest.		
+comply with this waiver of copyright interest.
 
 See the [formal LICENSE file](/LICENSE).
 

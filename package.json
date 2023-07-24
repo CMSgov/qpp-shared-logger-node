@@ -5,7 +5,7 @@
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
   "repository": "https://github.com/CMSgov/qpp-shared-logger-node.git",
-  "author": "Branon Barrett <branon.barrett@semanticbits.com>",
+  "author": "Centers for Medicare & Medicaid Services",
   "license": "CC0-1.0",
   "dependencies": {
     "lodash": "^4.17.21",
