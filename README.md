@@ -1,4 +1,4 @@
-# qpp-shared-logger-node ![Build](https://github.com/CMSgov/qpp-shared-logger-node/workflows/Build%20-%20PR/badge.svg) [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/dashboard?id=CMSgov_qpp-shared-logger-node) [![npm version](https://badge.fury.io/js/qpp-shared-logger-node.svg)](https://badge.fury.io/js/qpp-shared-logger-node) 
+# qpp-shared-logger-node ![Build](https://github.com/CMSgov/qpp-shared-logger-node/workflows/Build%20-%20PR/badge.svg) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=CMSgov_qpp-shared-logger-node&metric=alert_status)](https://sonarcloud.io/dashboard?id=CMSgov_qpp-shared-logger-node) [![npm version](https://badge.fury.io/js/qpp-shared-logger-node.svg)](https://badge.fury.io/js/qpp-shared-logger-node)
 A simple configurable wrapper around the [winston](https://www.npmjs.com/package/winston) application logger and the [morgan](https://www.npmjs.com/package/morgan) http access logger.
 
 This logger is opinionated. Configure it with a minimal set of options, and get Splunk-searchable, PII-scrubbed, and QPP-compliant logs with minimal effort.
@@ -108,6 +108,7 @@ logLevel | All log messages at this level or higher will be logged. `none` effec
 logTimestamps | Add timestamps to log entries | `true` or `false` | `true`
 logColorize | If `true`, log messages will be sent colorized (most valuable when logging to the `console`) | `true` or `false` | `false`
 redactKeys | An array of keys to scrub from the log metadata | an array of lowercase strings | ``['email', 'firstname', 'lastname', 'password', 'ptan', 'tin', 'userid', 'username']``
+redactRegexes | An array of regular expressions representing string values to scrub | an array of regular expressions (string or `RegExp`) | ``[]``
 maxDays | The maximum number of days to keep logs for. | A number, in days | 0 (No deletion)
 rotationMaxsize | The max size the log file should reach before it is rotated. | a size, in bytes. For example, 1M = 1000000. Or 'none' to never rotate logs | 50000000 (50M)
 splunkSettings | Adding the Splunk configuration settings will add Splunk http transport via the [winston-splunk-httplogger](https://github.com/adrianhall/winston-splunk-httplogger) package | `object` | `undefined`
@@ -119,7 +120,7 @@ Key | Description | Allowed Values | Default
 url | URL string to pass to `url.parse`. This will try to set `host`, `path`, `protocol`, `port`, `url`. Any of these values will be overwritten if the corresponding property is set on `config` | `http://localhost:8888` | `undefined`
 token | The Splunk HTTP Event Collector token | |
 
-_**WARNING**_ - If the Splunk transport fails to connect to Splunk, log messages will be lost during the outage. DO NOT rely on this logger alone if you need to have guaranteed delivery of all logs to Splunk. 
+_**WARNING**_ - If the Splunk transport fails to connect to Splunk, log messages will be lost during the outage. DO NOT rely on this logger alone if you need to have guaranteed delivery of all logs to Splunk.
 
 ### Advanced HTTP Access Log Configuration
 Override defaults.
@@ -150,7 +151,7 @@ Tested with node v10.15.3 and node v12.15.0
 
 ## Development
 ```
-$ brew install gitleaks # Installs gitleaks for pre-commit secret detection. If not running on Mac, see https://github.com/zricethezav/gitleaks/releases 
+$ brew install gitleaks # Installs gitleaks for pre-commit secret detection. If not running on Mac, see https://github.com/zricethezav/gitleaks/releases
 $ npm install       # install dependencies
 $ npm  test         # run tests, also report coverage in ./coverage/index.html
 $ npm run  format   # run prettier to format code
@@ -163,11 +164,11 @@ The release process is semi-automated via github actions. A number of steps are 
 
 1. Create a release branch `release/*` either off of `master` to pull all changes, or by cherry-picking only certain changes.
 
-2. Bump the `version` using `npm version <patch | minor | major>`. 
-  
+2. Bump the `version` using `npm version <patch | minor | major>`.
+
 3. Push the release branch to github.
 
-4. Github actions will automatically [create a release](https://github.com/CMSgov/qpp-shared-logger-node/releases/) and tag based off the version in `package.json`. 
+4. Github actions will automatically [create a release](https://github.com/CMSgov/qpp-shared-logger-node/releases/) and tag based off the version in `package.json`.
 
 5. Review the draft release page and publish it as a pre-release.
 
@@ -181,10 +182,10 @@ Want to file a bug or contribute some code? Read up on our guidelines for [contr
 
 ## Public Domain
 This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived
-through the CC0 1.0 Universal public domain dedication.		
+through the CC0 1.0 Universal public domain dedication.
 
 All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to
-comply with this waiver of copyright interest.		
+comply with this waiver of copyright interest.
 
 See the [formal LICENSE file](/LICENSE).
 
@@ -199,3 +200,5 @@ See the [formal LICENSE file](/LICENSE).
 * https://www.npmjs.com/package/winston
 * https://www.npmjs.com/package/morgan
 * https://github.com/i0natan/nodebestpractices/blob/master/sections/production/setnodeenv.md
+
+

@@ -5,7 +5,10 @@ import { Scrubber } from '../src/scrubber';
 
 describe('scrubber', function () {
     // initialize scrubber
-    const scrubber = new Scrubber(['password', 'firstname', 'CamelCaseKey']);
+    const scrubber = new Scrubber(
+        ['password', 'firstname', 'CamelCaseKey'],
+        [/X\d{3}/i, 'AB\\d+'],
+    );
 
     it('should allow safe metadata', function () {
         const scrubbedData = scrubber.scrub({
@@ -104,6 +107,19 @@ describe('scrubber', function () {
             'users[1].firstname': '[REDACTED]',
         });
     });
+    it('should redact strings via regular expression', function () {
+        const scrubbedData = scrubber.scrub({
+            level: 'info',
+            message:
+                'Users X391 and x910 (but not x82) provided PINs AB1 and AB492 (not AA7)',
+        });
+
+        assert.include(scrubbedData, { level: 'info' });
+        assert.include(scrubbedData, {
+            message:
+                'Users [REDACTED] and [REDACTED] (but not x82) provided PINs [REDACTED] and [REDACTED] (not AA7)',
+        });
+    });
     it('should not modify the object passed to it', function () {
         const input = {
             zipCode: '96161',
@@ -122,7 +138,7 @@ describe('scrubber', function () {
             Object.assign(input, {
                 level: 'info',
                 message: 'this is the message',
-            })
+            }),
         );
 
         assert.nestedInclude(input, { 'users[0].password': 'Password1' });

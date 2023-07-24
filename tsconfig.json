@@ -15,7 +15,6 @@
     "maxNodeModuleJsDepth": 2,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "keyofStringsOnly": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "typeRoots": [
