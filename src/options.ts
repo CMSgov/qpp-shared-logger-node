@@ -19,6 +19,7 @@ export interface Options {
     };
     datePattern?: string;
     redactKeys?: string[];
+    redactRegexes?: Array<string | RegExp>;
     maxDays?: number;
     rotationMaxsize?: number | string;
     accessLog?: {

@@ -2,7 +2,7 @@ import * as winston from 'winston';
 import DailyRotateFile = require('winston-daily-rotate-file');
 import SplunkStreamEvent = require('winston-splunk-httplogger');
 import morgan = require('morgan'); // access log
-import RotatingFileStream from 'rotating-file-stream'; // for morgan
+import * as rfs from 'rotating-file-stream'; // for morgan
 import fs = require('fs');
 import filenames = require('./filenames');
 import { Scrubber } from './scrubber';
@@ -76,16 +76,16 @@ function buildAccessLogStream(options: Options) {
                 streamOptions.maxFiles = options.accessLog.maxFiles;
             }
 
-            return RotatingFileStream(
+            return rfs.createStream(
                 filenames.accessLogFilenameGenerator(options),
-                streamOptions
+                streamOptions,
             );
         } else {
             return fs.createWriteStream(
                 `${accessLogDirectory(options)}/${filenames.accessLogFilename(
-                    options
+                    options,
                 )}.log`,
-                { flags: 'a' }
+                { flags: 'a' },
             );
         }
     }
@@ -159,7 +159,7 @@ class SharedLogger {
         if (this.configured) {
             // eslint-disable-next-line no-console
             console.error(
-                'sharedLogger.configure(): called more than once, ignoring'
+                'sharedLogger.configure(): called more than once, ignoring',
             );
             return;
         }
@@ -182,7 +182,10 @@ class SharedLogger {
         // winston: application logger
         //
         if (logEnabled(options)) {
-            const scrubber = new Scrubber(options.redactKeys || []);
+            const scrubber = new Scrubber(
+                options.redactKeys || [],
+                options.redactRegexes || [],
+            );
             let formats = [
                 scrubber.format(),
                 winston.format.label({ label: options.projectSlug }),
@@ -224,12 +227,12 @@ class SharedLogger {
                 if (transport) {
                     console.error(
                         `Error from logging transport '${transport.name}':`,
-                        error
+                        error,
                     );
                     // Errors from transports could result in the transport being removed, re-add if that's the case
                     // Compare against the passed transport object instead of name in case multiple transports exist
                     const transportIndex = this.logger.transports.findIndex(
-                        (element) => element == transport
+                        (element) => element == transport,
                     );
                     if (transportIndex == -1) {
                         this.logger.add(transport);
@@ -248,15 +251,18 @@ class SharedLogger {
         options.accessLog = options.accessLog || {};
         if (accessLogEnabled(options)) {
             morgan.token('url', (req) => {
-                const url = req['pathname'] ?? req.baseUrl;
-                if (!req.query || Object.keys(req.query).length === 0) {
+                const url = req['pathname'] ?? req['baseUrl'];
+                if (!req['query'] || Object.keys(req['query']).length === 0) {
                     return url;
                 }
                 // redact the query parameters
-                const scrubber = new Scrubber(options.redactKeys || []);
-                const scrubbedQuery = scrubber.scrub(req.query);
+                const scrubber = new Scrubber(
+                    options.redactKeys || [],
+                    options.redactRegexes || [],
+                );
+                const scrubbedQuery = scrubber.scrub(req['query']);
                 const scrubbedQueryParameters = Object.entries(
-                    scrubbedQuery || {}
+                    scrubbedQuery || {},
                 )
                     .map((query) => `${query[0]}=${query[1]}`)
                     .join('&');
@@ -299,14 +305,14 @@ class SharedLogger {
             transports.push(
                 new winston.transports.Console({
                     handleExceptions: true,
-                })
+                }),
             );
         } else {
             if (options.rotationMaxsize !== 'none') {
                 transports.push(
                     new DailyRotateFile({
                         filename: `${logDirectory(
-                            options
+                            options,
                         )}/${filenames.logFilename(options)}.%DATE%.${
                             options.logFileExtension || 'log'
                         }`,
@@ -316,15 +322,15 @@ class SharedLogger {
                         maxFiles: `${
                             options.maxDays || defaultRotationMaxDays
                         }d`,
-                    })
+                    }),
                 );
             } else {
                 transports.push(
                     new winston.transports.File({
                         filename: `${logDirectory(
-                            options
+                            options,
                         )}/${filenames.logFilename(options)}.log`,
-                    })
+                    }),
                 );
             }
         }
@@ -333,14 +339,14 @@ class SharedLogger {
             const defaultSplunkOptions = { maxRetries: 5, index: 'qpp' };
             const splunkOptions = Object.assign(
                 defaultSplunkOptions,
-                options.splunkSettings
+                options.splunkSettings,
             );
 
             transports.push(
                 new SplunkStreamEvent({
                     splunk: splunkOptions,
                     handleExceptions: true,
-                })
+                }),
             );
         }
 

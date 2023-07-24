@@ -108,6 +108,7 @@ logLevel | All log messages at this level or higher will be logged. `none` effec
 logTimestamps | Add timestamps to log entries | `true` or `false` | `true`
 logColorize | If `true`, log messages will be sent colorized (most valuable when logging to the `console`) | `true` or `false` | `false`
 redactKeys | An array of keys to scrub from the log metadata | an array of lowercase strings | ``['email', 'firstname', 'lastname', 'password', 'ptan', 'tin', 'userid', 'username']``
+redactRegexes | An array of regular expressions representing string values to scrub | an array of regular expressions (string or `RegExp`) | ``[]``
 maxDays | The maximum number of days to keep logs for. | A number, in days | 0 (No deletion)
 rotationMaxsize | The max size the log file should reach before it is rotated. | a size, in bytes. For example, 1M = 1000000. Or 'none' to never rotate logs | 50000000 (50M)
 splunkSettings | Adding the Splunk configuration settings will add Splunk http transport via the [winston-splunk-httplogger](https://github.com/adrianhall/winston-splunk-httplogger) package | `object` | `undefined`
@@ -156,6 +157,17 @@ $ npm  test         # run tests, also report coverage in ./coverage/index.html
 $ npm run  format   # run prettier to format code
 $ npm run lint      # run eslint to check code
 ```
+
+## Publishing
+
+The [qpp-shared-logger-node npm package](https://www.npmjs.com/package/qpp-shared-logger-node) can be published to npmjs.com via GitHub workflow. Make sure that an `NPM_TOKEN` is configured in the repository's Secrets setttings. The token must belong to a member of the npm package's maintainers team. To publish, make sure the version number in package.json is updated, then create a Release in GitHub with the "pre-release" checkbox checked. Publishing should happen automatically after that.
+
+If the GitHub Workflow is not working, a member of the npm package's maintainers team can publish via command line on a local computer.
+
+    npm login
+    git checkout master
+    git pull
+    npm publish
 
 
 ## Want to Contribute?

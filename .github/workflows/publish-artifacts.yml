@@ -7,7 +7,7 @@ name: Publish - NPMJS
 
 on:
   release:
-    types: [ prereleased ]
+    types: [ published ]
 
 jobs:
 
@@ -24,13 +24,13 @@ jobs:
       - name: Configure Node version and registry
         uses: actions/setup-node@v1
         with:
-          node-version: 10.14.2
+          node-version: 18.11
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Dependencies
         run: |
-          npm run prepare
           npm install
+          npm run prepare
 
       - name: Publish to NPMJS
         run: npm publish
