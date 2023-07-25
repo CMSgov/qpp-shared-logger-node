@@ -117,14 +117,14 @@ describe('sharedLogger', function () {
             };
             const spy = sandbox.spy(process.stdout, 'write');
             sharedLogger.configure(options);
-            sharedLogger.logger.info('should be prettyPrint', { meta: {a: 'b'}});
+            sharedLogger.logger.info('should be prettyPrint', {
+                meta: { a: 'b' },
+            });
 
-            const expectedVal = "{\n  meta: { a: 'b' },\n  level: 'info',\n  message: 'should be prettyPrint',\n  label: 'test'\n}\n";
+            const expectedVal =
+                "{\n  meta: { a: 'b' },\n  level: 'info',\n  message: 'should be prettyPrint',\n  label: 'test'\n}\n";
 
-            assert.equal(
-                spy.getCall(0).lastArg,
-                expectedVal,
-            );
+            assert.equal(spy.getCall(0).lastArg, expectedVal);
         });
 
         it('should set format to logstash', () => {

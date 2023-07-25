@@ -146,7 +146,7 @@ const noneLogger = {
 
 // A morgan-equivalent logger used for format='none' that suppresses
 // all output
-const noneAccessLogger = function (req, res, next) {};
+const noneAccessLogger = function (...args: unknown[]) {};
 
 class SharedLogger {
     accessLogger = undefined;
