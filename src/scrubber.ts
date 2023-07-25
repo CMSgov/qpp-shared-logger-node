@@ -36,7 +36,7 @@ export class Scrubber {
         this.blacklist = [
             ...new Set([
                 ...redactKeys.map((key) => key.toLowerCase()),
-                ...defaultRedactKeys,
+                ...defaultRedactKeys.map((key) => key.toLowerCase()),
             ]),
         ];
         this.regexesBlacklist = regexesBlacklist ?? [];

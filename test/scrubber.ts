@@ -147,4 +147,14 @@ describe('scrubber', function () {
         assert.nestedInclude(input, { 'users[1].password': 'Password321' });
         assert.nestedInclude(input, { 'users[1].firstname': 'Jeff' });
     });
+
+    it('should redact default keys with capitalized letters', function () {
+        const scrubbedData = scrubber.scrub({
+            taxpayerIdentificationNumber: '00012345',
+        });
+
+        assert.include(scrubbedData, {
+            taxpayerIdentificationNumber: '[REDACTED]',
+        });
+    });
 });
