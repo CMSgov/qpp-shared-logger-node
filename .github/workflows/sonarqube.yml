@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [ opened, synchronize, reopened ]
     branches:
-      - develop
+      - master
 
 env:
   PROJECT_NAME: qppa-repos-sonarqube-analysis
