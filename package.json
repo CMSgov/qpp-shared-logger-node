@@ -21,7 +21,7 @@
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "@types/morgan": "^1.9.4",
-    "@types/node": "^20.4.2",
+    "@types/node": "^20.11.1",
     "@typescript-eslint/parser": "^6.1.0",
     "chai": "^4.3.7",
     "eslint": "^8.45.0",
