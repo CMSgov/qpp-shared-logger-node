@@ -17,7 +17,7 @@
     "winston-transport": "^4.5.0"
   },
   "devDependencies": {
-    "@snyk/protect": "^1.1192.0",
+    "@snyk/protect": "^1.1300.1",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "@types/morgan": "^1.9.4",
