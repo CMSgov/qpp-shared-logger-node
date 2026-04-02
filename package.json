@@ -8,7 +8,7 @@
   "author": "Centers for Medicare & Medicaid Services",
   "license": "CC0-1.0",
   "dependencies": {
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "morgan": "^1.10.1",
     "rotating-file-stream": "^3.1.0",
     "winston": "^3.10.0",
