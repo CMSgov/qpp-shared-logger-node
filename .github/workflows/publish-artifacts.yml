@@ -6,6 +6,7 @@
 name: Publish - NPMJS
 
 on:
+  workflow_dispatch:
   release:
     types: [ published ]
 
@@ -13,6 +14,8 @@ jobs:
 
   publish-npm:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
 
       - name: Checkout Codebase
@@ -21,7 +24,7 @@ jobs:
           fetch-depth: 2
 
       - name: Configure Node version and registry
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
@@ -32,9 +35,7 @@ jobs:
           npm run prepare
 
       - name: Publish to NPMJS
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+        run: npm publish --access public --provenance
 
   # create a backfill PR of release into master after a successful release
   backfill:
