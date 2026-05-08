@@ -15,11 +15,12 @@ jobs:
   publish-npm:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       id-token: write
     steps:
 
       - name: Checkout Codebase
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -27,12 +28,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install Dependencies
-        run: |
-          npm install
-          npm run prepare
+        run: npm install
 
       - name: Publish to NPMJS
         run: npm publish --access public --provenance
@@ -45,7 +43,7 @@ jobs:
 
       - name: Checkout Release Branch
         if: ${{ github.event.release.draft == false && startsWith(github.event.release.target_commitish, 'release/')}}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.target_commitish }}
 
