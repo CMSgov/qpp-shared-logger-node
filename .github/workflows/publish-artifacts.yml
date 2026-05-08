@@ -22,11 +22,11 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false  # never use caching in release builds
       - run: npm ci
-      - run: npm publish --access public --provenance
+      - run: npm publish --access public
 
   # create a backfill PR of release into master after a successful release
   backfill:
