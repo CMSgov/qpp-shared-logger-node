@@ -4,7 +4,10 @@
   "description": "Common QPP logger that is shared across the different teams",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
-  "repository": "https://github.com/CMSgov/qpp-shared-logger-node.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CMSgov/qpp-shared-logger-node.git"
+  },
   "author": "Centers for Medicare & Medicaid Services",
   "license": "CC0-1.0",
   "dependencies": {
