@@ -26,7 +26,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false  # never use caching in release builds
       - run: npm ci
-      - run: npm publish --access public
+      - run: npm publish --access public --provenance
 
   # create a backfill PR of release into master after a successful release
   backfill:
