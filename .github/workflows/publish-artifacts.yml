@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   release:
     types: [ published ]
-    
+
 permissions:
   id-token: write  # Required for OIDC
   contents: read
@@ -18,6 +18,21 @@ jobs:
   publish-npm:
     runs-on: ubuntu-latest
     steps:
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::730335206644:role/delegatedadmin/developer/qppa-github-actions-role-1
+          aws-region: us-east-1
+
+      - name: Retrieve GitHub service account token from secops account
+        id: get-token
+        run: |
+          SECRET_VALUE=$(aws secretsmanager get-secret-value \
+            --secret-id "arn:aws:secretsmanager:us-east-1:863249929524:secret:qpp/qppa/github/token/automation-bhLO2e" \
+            --query SecretString \
+            --output text | jq -r ".GITHUB_TOKEN")
+          echo "::add-mask::$SECRET_VALUE"
+          echo "GITHUB_TOKEN=$SECRET_VALUE" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v6
@@ -45,11 +60,10 @@ jobs:
         id: pr
         uses: peter-evans/create-pull-request@45c510e1f68ba052e3cd911f661a799cfb9ba3a3 #v3.6.0
         with:
-          token: ${{ secrets.GH_USER_TOKEN }}
+          token: ${{ steps.get-token.outputs.GITHUB_TOKEN }}
           commit-message: Backfill ${{ github.event.release.repository.default_branch }} with release tag ${{ github.event.release.tag_name }}
           title: Backfill master -  ${{github.event.release.tag_name}}
           branch: feature/merge_release_${{github.event.release.tag_name}}
           base: ${{ github.event.release.repository.default_branch}}
           body: |
             Auto generated pull request to backfill `${{ github.event.release.tag_name }} into ${{ github.event.release.repository.default_branch }}`.
-
