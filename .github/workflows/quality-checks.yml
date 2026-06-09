@@ -10,12 +10,30 @@ on:
     types:
       - completed
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   perform-quality-checks:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.event == 'pull_request' }}
 
     steps:
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::730335206644:role/delegatedadmin/developer/qppa-github-actions-role-1
+          aws-region: us-east-1
+      - name: Retrieve GitHub service account token from secops account
+        id: get-token
+        run: |
+          SECRET_VALUE=$(aws secretsmanager get-secret-value \
+            --secret-id "arn:aws:secretsmanager:us-east-1:863249929524:secret:qpp/qppa/github/token/automation-bhLO2e" \
+            --query SecretString \
+            --output text | jq -r ".GITHUB_TOKEN")
+          echo "::add-mask::$SECRET_VALUE"
+          echo "GITHUB_TOKEN=$SECRET_VALUE" >> $GITHUB_OUTPUT
 
       - name: Checkout Codebase
         uses: actions/checkout@v2
@@ -26,7 +44,7 @@ jobs:
       - name: Download Coverage Artifacts
         uses: dawidd6/action-download-artifact@891cccee4b25d3306cf5edafa174ddc1d969871f
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ steps.get-token.outputs.GITHUB_TOKEN }}
           workflow: ${{ github.event.workflow_run.workflow_id }}
           commit: ${{ github.event.workflow_run.head_commit.id }}
           name: coverage
@@ -37,9 +55,8 @@ jobs:
         uses: 5monkeys/cobertura-action@67ec5c1b5ee78e49d22300126df88761ca6a7031 # pin @v7
         with:
           path: coverage/cobertura-coverage.xml
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ steps.get-token.outputs.GITHUB_TOKEN }}
           only_changed_files: ${{github.base_ref != null}}
           show_line: true
           show_branch: true
           minimum_coverage: 90
-
