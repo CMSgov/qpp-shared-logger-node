@@ -12,4 +12,4 @@ We always recommend users to upgrade to the latest revision. All security vulner
 
 ## Reporting a Vulnerability
 If you believe that you've found a security vulnerability in the codebase
-or one of the libraries maintained in this repository, please create an issue and provide details of the bug. For guidelines refer [SUPPORT.md](./github/SUPPORT.md)
+or one of the libraries maintained in this repository, please create an issue and provide details of the bug. For guidelines refer [SUPPORT.md](./.github/SUPPORT.md)
