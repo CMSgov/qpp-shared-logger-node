@@ -38,9 +38,10 @@ jobs:
           echo "::add-mask::$SECRET_VALUE"
           echo "GITHUB_TOKEN=$SECRET_VALUE" >> $GITHUB_OUTPUT
       - name: Checkout Codebase
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          token: ${{ steps.get-token.outputs.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Detect new tag version from package.json
         id: package-version
