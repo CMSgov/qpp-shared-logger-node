@@ -9,4 +9,4 @@ updates:
       exclude:
         - "@cmsgov/qpp-scoring-engines"
         - "qpp-measures-data"
-        - "qpp-shared-logger-node"
+        - "@cmsgov/qpp-shared-logger-node"
