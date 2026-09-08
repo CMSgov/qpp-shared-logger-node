@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+      exclude:
+        - "@cmsgov/qpp-scoring-engines"
+        - "qpp-measures-data"
+        - "@cmsgov/qpp-shared-logger-node"
