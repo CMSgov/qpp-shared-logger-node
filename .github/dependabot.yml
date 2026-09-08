@@ -2,11 +2,20 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
+    open-pull-requests-limit: 3
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "02:00"
+    allow:
+      - dependency-name: "*"
+        dependency-type: "production"
     cooldown:
       default-days: 7
       exclude:
         - "@cmsgov/qpp-scoring-engines"
         - "qpp-measures-data"
         - "@cmsgov/qpp-shared-logger-node"
+    reviewers:
+      - "CMSgov/cis-qppa-developers"
+    assignees:
+      - "nicholas-gates"
