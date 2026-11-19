@@ -13,7 +13,7 @@
   "dependencies": {
     "lodash": "^4.18.1",
     "morgan": "^1.10.1",
-    "rotating-file-stream": "^3.1.0",
+    "rotating-file-stream": "^4.0.0",
     "winston": "^3.10.0",
     "winston-daily-rotate-file": "^4.7.1",
     "winston-splunk-httplogger": "^3.1.8",
